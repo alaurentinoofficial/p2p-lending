@@ -27,6 +27,45 @@ func (lending *Lending) BeforeCreate(scope *gorm.Scope) error {
 	return nil
 }
 
+//func (lending *Lending) BeforeSave(scope *gorm.Scope) error {
+//	fmt.Println(lending.Amount == lending.AlreadyInvested)
+//	if !lending.Status && lending.Amount == lending.AlreadyInvested {
+//		lenders := GetLendersByLending(lending.ID)
+//
+//		totalAmount := float32(0)
+//		for _, lender := range lenders {
+//			// Check if the all lenders has balance
+//			if UserCheckBalance(lender.User, lender.Amount) {
+//				// Sum in the total
+//				totalAmount += lender.Amount
+//			} else {
+//				// Delete lender
+//				DeleteLender(lender.ID, lending.ID, lending)
+//			}
+//		}
+//
+//		if totalAmount == lending.Amount {
+//
+//			// Reduce balance from users
+//			for _, lender := range lenders {
+//				UserLend(lender.User, lender.Amount, lending)
+//
+//				lender.Status = true
+//				lender.Save()
+//			}
+//
+//			// Transfer to taker
+//			UserTake(lending.Taker, lending)
+//
+//			// Save configurations
+//			lending.Status = true
+//			lending.TransactionDate = time.Now().UTC().String()
+//		}
+//	}
+//
+//	return nil
+//}
+
 func (lending *Lending) Create() {
 	GetDB().Create(&lending)
 }
@@ -47,7 +86,8 @@ func (lending *Lending) Transfer() bool {
 			totalAmount += lender.Amount
 		} else {
 			// Delete lender
-			DeleteLender(lender.ID)
+			DeleteLender(lender.ID, lending.ID, lending)
+			return false
 		}
 	}
 
@@ -81,7 +121,7 @@ func (lending *Lending) Transfer() bool {
 
 func GetLendingById(id string) *Lending {
 	lending := Lending{}
-	GetDB().Table("lendings").First(lending)
+	GetDB().Table("lendings").First(&lending)
 
 	return &lending
 }

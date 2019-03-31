@@ -51,7 +51,7 @@ func GetUserById(id string) *User {
 
 func UserCheckBalance(userID string, amount float32) bool {
 	user := GetUserById(userID)
-	return user.Balance - amount > 0
+	return user.Balance - amount >= 0
 }
 
 func UserLend(userID string, amount float32, lending *Lending) {

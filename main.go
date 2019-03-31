@@ -34,7 +34,7 @@ func main() {
 		Password: "1234567890n",
 		CpfCnpj: "12345678901",
 		Score: 680,
-		Balance: float32(30000),
+		Balance: float32(7000),
 	}
 	user3.Create()
 	// ----------------------------------------
@@ -72,26 +72,12 @@ func main() {
 	lender2.Create()
 	// ----------------------------------------
 
-
-	// --------------[ Events ]----------------
-	lending.AlreadyInvested += lender1.Amount + lender2.Amount
-	lending.Save()
-
-	if !lending.Status && lending.Amount == lending.AlreadyInvested {
-		fmt.Println("[*] Transfering...")
-		lending.Transfer()
-	}
-	// ----------------------------------------
-
-
-
 	// ----------------------------------------
 	fmt.Println("Lending Status: ", lending.Status)
 
-	fmt.Println("User 1 Balance: ", models.GetUserById(user1.ID).Balance)
-
+	fmt.Println("\nUser 1 Balance: ", models.GetUserById(user1.ID).Balance)
 	fmt.Println("User 2 Balance: ", models.GetUserById(user2.ID).Balance)
-
 	fmt.Println("User 3 Balance: ", models.GetUserById(user3.ID).Balance)
 	// ----------------------------------------
+
 }
