@@ -34,12 +34,33 @@ func (lender *Lender) AfterCreate(scope *gorm.Scope) error {
 	return nil
 }
 
-func (lender *Lender) Create() {
-	GetDB().Create(lender)
+func (lender *Lender) Verify() bool {
+	isvalid := true
+
+	lending := GetLendingById(lender.Lending)
+
+	isvalid = isvalid && len(lending.ID) == len("dc5ccc85-c1ee-41b0-92a5-bd7bae46ad35")
+	isvalid = isvalid && lender.Amount > float32(0)
+
+	return isvalid
 }
 
-func (lender *Lender) Save() {
-	GetDB().Save(&lender)
+func (lender *Lender) Create() bool {
+	if lender.Verify() {
+		GetDB().Create(&lender)
+		return true
+	} else {
+		return false
+	}
+}
+
+func (lender *Lender) Save() bool {
+	if lender.Verify() {
+		GetDB().Save(&lender)
+		return true
+	} else {
+		return false
+	}
 }
 
 func GetLenderById(id string) *Lender {
