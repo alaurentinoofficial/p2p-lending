@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"p2p-lending/models"
-	"time"
 )
 
 func main() {
@@ -69,8 +68,7 @@ func main() {
 		HasIndex: false,
 		Index: -1,
 		PrefixedYield: 2.5,
-		Validate: time.Now().UTC().AddDate(0,1, 0).Format("2006-01-02T15:04:05.000Z"),
-		Status: false,
+		TimeMonth: 12,
 	}
 	lending.Create()
 	// ----------------------------------------

@@ -18,16 +18,18 @@ type Lending struct {
 	Validate        string  `json:"validate"`
 	TransactionDate string  `json:"transaction_date"`
 	HasIndex        bool    `json:"has_index"`
-	Index           int  `json:"index"`
+	Index           int     `json:"index"`
 	IndexYield      float32 `json:"index_yield"`
 	PrefixedYield   float32 `json:"prefixed_yield"`
+	TimeMonth       int     `json:"time_month"`
 }
 
 func (lending *Lending) BeforeCreate(scope *gorm.Scope) error {
 	uu, _ := uuid.NewV4()
 	_ = scope.SetColumn("ID", uu.String())
-	_ = scope.SetColumn("CreationDate", time.Now().UTC().String())
-	_ = scope.SetColumn("Validate", time.Now().UTC().AddDate(0,1,0).String())
+	_ = scope.SetColumn("Status", false)
+	_ = scope.SetColumn("CreationDate", time.Now().UTC().Format(time.RFC3339))
+	_ = scope.SetColumn("Validate", time.Now().UTC().AddDate(0,1, 0).Format(time.RFC3339))
 	return nil
 }
 
@@ -43,6 +45,8 @@ func (lending *Lending) Verify() bool {
 	} else {
 		isvalid = isvalid && lending.PrefixedYield > 0
 	}
+
+	isvalid = isvalid && lending.TimeMonth > 1
 
 	return isvalid
 }
@@ -82,11 +86,10 @@ func (lending *Lending) Transfer() bool {
 		}
 	}
 
-	// Convert the validate date to time.Date
-	validate, _ := time.Parse("2006-01-02T15:04:05.000Z", lending.Validate)
-
 	// Check all money received and check the date
 	if totalAmount == lending.Amount {
+		// Convert the validate date to time.Date
+		validate, _ := time.Parse(time.RFC3339, lending.Validate)
 
 		if time.Now().UTC().Before(validate) {
 			// Reduce balance from users
@@ -105,7 +108,7 @@ func (lending *Lending) Transfer() bool {
 			lending.TransactionDate = time.Now().UTC().String()
 			lending.Save()
 			return true
-		} else {
+		} else if time.Now().UTC().After(validate) {
 			DeleteLending(lending.ID)
 		}
 	}
@@ -121,6 +124,6 @@ func GetLendingById(id string) *Lending {
 }
 
 func DeleteLending(id string) {
-	fmt.Println("Expireted!")
+	fmt.Println("[*] Lending Expired!")
 	GetDB().Table("lendings").Where("id=?", id).Delete(&Lending{})
 }
