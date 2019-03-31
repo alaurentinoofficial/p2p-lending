@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/satori/go.uuid"
 	"p2p-lending/types"
@@ -26,6 +27,7 @@ func (lending *Lending) BeforeCreate(scope *gorm.Scope) error {
 	uu, _ := uuid.NewV4()
 	_ = scope.SetColumn("ID", uu.String())
 	_ = scope.SetColumn("CreationDate", time.Now().UTC().String())
+	_ = scope.SetColumn("Validate", time.Now().UTC().AddDate(0,1,0).String())
 	return nil
 }
 
@@ -81,31 +83,34 @@ func (lending *Lending) Transfer() bool {
 	}
 
 	// Convert the validate date to time.Date
-	//validate, _ := time.Parse("2006-01-02T15:04:05.000Z", lending.Validate)
+	validate, _ := time.Parse("2006-01-02T15:04:05.000Z", lending.Validate)
 
 	// Check all money received and check the date
 	if totalAmount == lending.Amount {
 
-		// Reduce balance from users
-		for _, lender := range lenders {
-			UserLend(lender.User, lender.Amount, lending)
+		if time.Now().UTC().Before(validate) {
+			// Reduce balance from users
+			for _, lender := range lenders {
+				UserLend(lender.User, lender.Amount, lending)
 
-			lender.Status = true
-			lender.Save()
+				lender.Status = true
+				lender.Save()
+			}
+
+			// Transfer to taker
+			UserTake(lending.Taker, lending)
+
+			// Save configurations
+			lending.Status = true
+			lending.TransactionDate = time.Now().UTC().String()
+			lending.Save()
+			return true
+		} else {
+			DeleteLending(lending.ID)
 		}
-
-		// Transfer to taker
-		UserTake(lending.Taker, lending)
-
-		// Save configurations
-		lending.Status = true
-		lending.TransactionDate = time.Now().UTC().String()
-		lending.Save()
-
-		return true
-	} else {
-		return false
 	}
+
+	return false
 }
 
 func GetLendingById(id string) *Lending {
@@ -113,4 +118,9 @@ func GetLendingById(id string) *Lending {
 	GetDB().Table("lendings").First(&lending)
 
 	return &lending
+}
+
+func DeleteLending(id string) {
+	fmt.Println("Expireted!")
+	GetDB().Table("lendings").Where("id=?", id).Delete(&Lending{})
 }
