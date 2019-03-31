@@ -9,19 +9,20 @@ import (
 )
 
 type Lending struct {
-	ID              string  `json:"id" gorm:"primary_key;"`
-	Taker           string  `json:"taker"`
-	Amount          float32 `json:"amount"`
-	AlreadyInvested float32 `json:"already_invested"`
-	Status          bool    `json:"status"`
-	CreationDate    string  `json:"creation_date"`
-	Validate        string  `json:"validate"`
-	TransactionDate string  `json:"transaction_date"`
-	HasIndex        bool    `json:"has_index"`
-	Index           int     `json:"index"`
-	IndexYield      float32 `json:"index_yield"`
-	PrefixedYield   float32 `json:"prefixed_yield"`
-	TimeMonth       int     `json:"time_month"`
+	ID                  string  `json:"id" gorm:"primary_key;"`
+	Taker               string  `json:"taker"`
+	Amount              float32 `json:"amount"`
+	AlreadyInvested     float32 `json:"already_invested"`
+	Status              bool    `json:"status"`
+	CreationDate        string  `json:"creation_date"`
+	Validate            string  `json:"validate"`
+	TransactionDate     string  `json:"transaction_date"`
+	HasIndex            bool    `json:"has_index"`
+	Index               int     `json:"index"`
+	IndexYield          float32 `json:"index_yield"`
+	PrefixedYield       float32 `json:"prefixed_yield"`
+	MonthlyInterestRate float32 `json:"monthly_interest_rate"`
+	PaymentTimeMonth    int     `json:"payment_time_month"`
 }
 
 func (lending *Lending) BeforeCreate(scope *gorm.Scope) error {
@@ -29,7 +30,7 @@ func (lending *Lending) BeforeCreate(scope *gorm.Scope) error {
 	_ = scope.SetColumn("ID", uu.String())
 	_ = scope.SetColumn("Status", false)
 	_ = scope.SetColumn("CreationDate", time.Now().UTC().Format(time.RFC3339))
-	_ = scope.SetColumn("Validate", time.Now().UTC().AddDate(0,1, 0).Format(time.RFC3339))
+	_ = scope.SetColumn("Validate", time.Now().UTC().AddDate(0, 1, 0).Format(time.RFC3339))
 	return nil
 }
 
@@ -46,7 +47,7 @@ func (lending *Lending) Verify() bool {
 		isvalid = isvalid && lending.PrefixedYield > 0
 	}
 
-	isvalid = isvalid && lending.TimeMonth > 1
+	isvalid = isvalid && lending.PaymentTimeMonth > 1
 
 	return isvalid
 }
