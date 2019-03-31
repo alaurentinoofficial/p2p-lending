@@ -68,7 +68,7 @@ func main() {
 		HasIndex: false,
 		Index: -1,
 		PrefixedYield: 2.5,
-		TimeMonth: 12,
+		PaymentTimeMonth: 12,
 	}
 	lending.Create()
 	// ----------------------------------------

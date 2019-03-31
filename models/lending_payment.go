@@ -8,7 +8,7 @@ import (
 type LendingPayment struct {
 	ID            string  `json:"id" gorm:"primary_key;"`
 	Lending       string  `json:"lending"`
-	Taker         float32 `json:"taker"`
+	Taker         string  `json:"taker"`
 	Validate      string  `json:"validate"`
 	Value         float32 `json:"value"`
 	Portion       int     `json:"Portion"`
@@ -24,4 +24,34 @@ func (payment *LendingPayment) BeforeCreate(scope *gorm.Scope) error {
 	_ = scope.SetColumn("MonthlyDelays", 0)
 	_ = scope.SetColumn("Status", false)
 	return nil
+}
+
+func (payment *LendingPayment) Verify() bool {
+	isvalid := true
+
+	isvalid = isvalid && len(payment.Lending) == len("dc5ccc85-c1ee-41b0-92a5-bd7bae46ad35")
+	isvalid = isvalid && len(payment.Taker) == len("dc5ccc85-c1ee-41b0-92a5-bd7bae46ad35")
+	isvalid = isvalid && payment.Portion >= 1
+	isvalid = isvalid && payment.MonthlyDelays >= 0
+	isvalid = isvalid && payment.Value >= 0
+
+	return isvalid
+}
+
+func (payment *LendingPayment) Create() bool {
+	if payment.Verify() {
+		GetDB().Create(payment)
+		return true
+	} else {
+		return  false
+	}
+}
+
+func (payment *LendingPayment) Save() bool {
+	if payment.Verify() {
+		GetDB().Save(payment)
+		return true
+	} else {
+		return  false
+	}
 }
