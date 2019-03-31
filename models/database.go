@@ -37,7 +37,9 @@ func init() {
 
 	db = conn
 
-	// db.DropTableIfExists("accounts")
+	db.DropTableIfExists("users")
+	db.DropTableIfExists("lendings")
+	db.DropTableIfExists("lenders")
 	db.AutoMigrate(&User{}, &Lending{}, &Lender{})
 }
 

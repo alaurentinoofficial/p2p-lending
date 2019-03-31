@@ -7,7 +7,7 @@ import (
 )
 
 type Lender struct {
-	ID            string  `json:"id"`
+	ID            string  `json:"id" gorm:"primary_key;"`
 	Lending       string  `json:"lending"`
 	User          string  `json:"user"`
 	Amount        float32 `json:"amount"`
@@ -16,32 +16,18 @@ type Lender struct {
 }
 
 func (lender *Lender) BeforeCreate(scope *gorm.Scope) error {
-	lending := GetLendingById(lender.Lending)
-	lending.AlreadyInvested += lender.Amount
-	lending.Save()
-
 	uu, _ := uuid.NewV4()
 	_ = scope.SetColumn("ID", uu.String())
 	_ = scope.SetColumn("OperationDate", time.Now().UTC().String())
 	return nil
 }
 
-func (lender *Lender) AfterCreate(scope *gorm.Scope) error {
-	lending := GetLendingById(lender.Lending)
-
-	if lending.Amount == lending.AlreadyInvested {
-		lending.Transfer()
-	}
-
-	return nil
-}
-
 func (lender *Lender) Create() {
-	GetDB().Table("lenders").Create(&lender)
+	GetDB().Create(lender)
 }
 
 func (lender *Lender) Save() {
-	GetDB().Table("lenders").Save(&lender)
+	GetDB().Save(&lender)
 }
 
 func GetLenderById(id string) *Lender {

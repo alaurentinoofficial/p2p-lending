@@ -7,7 +7,7 @@ import (
 )
 
 type Statement struct {
-	ID            string  `json:"id"`
+	ID            string  `json:"id" gorm:"primary_key;"`
 	Title         string  `json:"Title"`
 	User          string  `json:"user"`
 	Type          int     `json:"types"`
@@ -23,11 +23,11 @@ func (statement *Statement) BeforeCreate(scope *gorm.Scope) error {
 }
 
 func (statement *Statement) Create() {
-	GetDB().Table("statement").Create(&statement)
+	GetDB().Create(&statement)
 }
 
 func (statement *Statement) Save() {
-	GetDB().Table("statement").Save(&statement)
+	GetDB().Save(&statement)
 }
 
 func GetStatementByUser(userID string) []*Statement {

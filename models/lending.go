@@ -7,7 +7,7 @@ import (
 )
 
 type Lending struct {
-	ID              string  `json:"id"`
+	ID              string  `json:"id" gorm:"primary_key;"`
 	Taker           string  `json:"taker"`
 	Amount          float32 `json:"amount"`
 	AlreadyInvested float32 `json:"already_invested"`
@@ -28,11 +28,11 @@ func (lending *Lending) BeforeCreate(scope *gorm.Scope) error {
 }
 
 func (lending *Lending) Create() {
-	GetDB().Table("lendings").Create(&lending)
+	GetDB().Create(&lending)
 }
 
 func (lending *Lending) Save() {
-	GetDB().Table("lendings").Save(&lending)
+	GetDB().Save(&lending)
 }
 
 func (lending *Lending) Transfer() bool {
@@ -52,10 +52,10 @@ func (lending *Lending) Transfer() bool {
 	}
 
 	// Convert the validate date to time.Date
-	validate, _ := time.Parse("2006-01-02T15:04:05.000Z", lending.Validate)
+	//validate, _ := time.Parse("2006-01-02T15:04:05.000Z", lending.Validate)
 
 	// Check all money received and check the date
-	if totalAmount == lending.Amount && time.Now().UTC().Before(validate) {
+	if totalAmount == lending.Amount {
 
 		// Reduce balance from users
 		for _, lender := range lenders {

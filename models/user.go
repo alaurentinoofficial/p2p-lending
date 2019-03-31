@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/satori/go.uuid"
 	"p2p-lending/types"
@@ -8,7 +9,7 @@ import (
 )
 
 type User struct {
-	ID           string  `json:"id"`
+	ID           string  `json:"id" gorm:"primary_key;"`
 	Name         string  `json:"name"`
 	Email        string  `json:"email"`
 	Password     string  `json:"password"`
@@ -34,16 +35,16 @@ func (user *User) BeforeCreate(scope *gorm.Scope) error {
 }
 
 func (user *User) Create() {
-	GetDB().Table("users").Create(&user)
+	GetDB().Create(&user)
 }
 
 func (user *User) Save() {
-	GetDB().Table("users").Save(&user)
+	GetDB().Save(&user)
 }
 
 func GetUserById(id string) *User {
 	user := User{}
-	GetDB().Table("users").Where(id).First(&user)
+	GetDB().Table("users").Where("id = ?", id).First(&user)
 
 	return &user
 }
@@ -57,7 +58,9 @@ func UserLend(userID string, amount float32, lending *Lending) {
 	user := GetUserById(userID)
 
 	// Remove money
+	fmt.Println(user.Balance)
 	user.Balance -= amount
+	fmt.Println(user.Balance)
 	user.Save()
 
 	// Create a statement
