@@ -18,7 +18,7 @@ type Lender struct {
 func (lender *Lender) BeforeCreate(scope *gorm.Scope) error {
 	uu, _ := uuid.NewV4()
 	_ = scope.SetColumn("ID", uu.String())
-	_ = scope.SetColumn("OperationDate", time.Now().UTC().String())
+	_ = scope.SetColumn("OperationDate", time.Now().UTC().Format(time.RFC3339))
 	return nil
 }
 
