@@ -12,29 +12,50 @@ func main() {
 		Name: "Anderson Laurentino",
 		Email: "alaurentino.br@gmail.com",
 		Password: "1234567890n",
+		Type: 0,
 		CpfCnpj: "12345678901",
 		Score: 967,
 		Balance: float32(0),
+		State: "PE",
+		City: "Recife",
+		Neighborhood: "Boa vista",
+		ZipCode: "50100000",
+		Number: 1000,
+		Complement: "",
 	}
 	user1.Create()
 
 	user2 := models.User{
-		Name: "João Matheus",
-		Email: "jmgc@gmail.com",
+		Name: "Fulano de tal",
+		Email: "fulano.tal@gmail.com",
 		Password: "1234567890n",
+		Type: 0,
 		CpfCnpj: "12345678901",
-		Score: 870,
-		Balance: float32(30000),
+		Score: 967,
+		Balance: float32(10000),
+		State: "PE",
+		City: "Recife",
+		Neighborhood: "Boa vista",
+		ZipCode: "50100000",
+		Number: 1001,
+		Complement: "",
 	}
 	user2.Create()
 
 	user3 := models.User{
-		Name: "Helton Alves",
-		Email: "jhap@gmail.com",
+		Name: "Rick e Morty",
+		Email: "rick.morty@gmail.com",
 		Password: "1234567890n",
+		Type: 0,
 		CpfCnpj: "12345678901",
-		Score: 680,
+		Score: 967,
 		Balance: float32(7000),
+		State: "PE",
+		City: "Recife",
+		Neighborhood: "Boa vista",
+		ZipCode: "50100000",
+		Number: 1001,
+		Complement: "",
 	}
 	user3.Create()
 	// ----------------------------------------
@@ -44,7 +65,7 @@ func main() {
 	lending := models.Lending{
 		Taker: user1.ID,
 		AlreadyInvested: 0,
-		Amount: float32(10000),
+		Amount: float32(12000),
 		HasIndexer: false,
 		Indexer: "NONE",
 		Yield: float32(2.5),
@@ -57,7 +78,7 @@ func main() {
 	// -------------[ Lenders ]----------------
 	lender1 := models.Lender{
 		User: user2.ID,
-		Amount: float32(3000),
+		Amount: float32(5000),
 		Status: false,
 		Lending: lending.ID,
 	}

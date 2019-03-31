@@ -5,6 +5,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/satori/go.uuid"
 	"p2p-lending/types"
+	"strings"
 	"time"
 )
 
@@ -14,11 +15,10 @@ type User struct {
 	Email        string  `json:"email"`
 	Password     string  `json:"password"`
 	CreationDate string  `json:"creation_date"`
-	Type         string  `json:"types"`
+	Type         int     `json:"types"`
 	Score        int     `json:"score"`
 	CpfCnpj      string  `json:"cpf_cpnj"`
 	Balance      float32 `json:"balance"`
-	Country      string  `json:"country"`
 	State        string  `json:"state"`
 	City         string  `json:"city"`
 	Neighborhood string  `json:"neighborhood"`
@@ -34,12 +34,46 @@ func (user *User) BeforeCreate(scope *gorm.Scope) error {
 	return nil
 }
 
-func (user *User) Create() {
-	GetDB().Create(&user)
+func (user *User) Create() bool {
+	if user.Verify() {
+		GetDB().Create(&user)
+		return true
+	} else {
+		return false
+	}
 }
 
-func (user *User) Save() {
-	GetDB().Save(&user)
+func (user *User) Save() bool {
+	if user.Verify() {
+		GetDB().Save(&user)
+		return true
+	} else {
+		return false
+	}
+}
+
+func (user *User) Verify() bool {
+	isvalid := true
+
+	isvalid = isvalid && strings.Contains(user.Email, "@")
+	isvalid = isvalid && len(user.Password) > 6
+
+	// Check if Physical or Legal person
+	if user.Type == types.User.Physical {
+		isvalid = isvalid && len(user.CpfCnpj) == 11
+	} else {
+		isvalid = isvalid && len(user.CpfCnpj) == 14
+	}
+
+	isvalid = isvalid && user.Score >= 0 && user.Score <= 1000
+
+	isvalid = isvalid && len(user.State) > 0
+	isvalid = isvalid && len(user.City) > 0
+	isvalid = isvalid && len(user.Neighborhood) > 0
+	isvalid = isvalid && user.Number > 0
+	isvalid = isvalid && len(user.ZipCode) == 8
+
+	return isvalid
 }
 
 func GetUserById(id string) *User {
@@ -51,7 +85,7 @@ func GetUserById(id string) *User {
 
 func UserCheckBalance(userID string, amount float32) bool {
 	user := GetUserById(userID)
-	return user.Balance - amount >= 0
+	return user.Balance-amount >= 0
 }
 
 func UserLend(userID string, amount float32, lending *Lending) {
