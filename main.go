@@ -96,9 +96,9 @@ func main() {
 	// ----------------------------------------
 	fmt.Println("Lending Status: ", lending.Status)
 
-	fmt.Println("\nUser 1 Balance: ", models.GetUserById(user1.ID).Balance)
-	fmt.Println("User 2 Balance: ", models.GetUserById(user2.ID).Balance)
-	fmt.Println("User 3 Balance: ", models.GetUserById(user3.ID).Balance)
+	fmt.Println("\nUser 1 Balance: ", user1.Balance, "\t\t-> ", models.GetUserById(user1.ID).Balance)
+	fmt.Println("User 2 Balance: ", user2.Balance, "\t-> ",  models.GetUserById(user2.ID).Balance)
+	fmt.Println("User 3 Balance: ", user3.Balance, "\t-> ",  models.GetUserById(user3.ID).Balance)
 	// ----------------------------------------
 
 }
