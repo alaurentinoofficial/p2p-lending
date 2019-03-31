@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	// ----------------------------------------
+	// ---------------[ User ]-----------------
 	user1 := models.User{
 		Name: "Anderson Laurentino",
 		Email: "alaurentino.br@gmail.com",
@@ -40,7 +40,7 @@ func main() {
 	// ----------------------------------------
 
 
-	// ----------------------------------------
+	// -------------[The lending]--------------
 	lending := models.Lending{
 		Taker: user1.ID,
 		AlreadyInvested: 0,
@@ -54,7 +54,7 @@ func main() {
 	lending.Create()
 	// ----------------------------------------
 
-	// ----------------------------------------
+	// -------------[ Lenders ]----------------
 	lender1 := models.Lender{
 		User: user2.ID,
 		Amount: float32(3000),
@@ -70,15 +70,20 @@ func main() {
 		Lending: lending.ID,
 	}
 	lender2.Create()
-
-	lending.AlreadyInvested += lender1.Amount + lender2.Amount
-	lending.Save()
 	// ----------------------------------------
 
-	if lending.Amount == lending.AlreadyInvested {
+
+	// --------------[ Events ]----------------
+	lending.AlreadyInvested += lender1.Amount + lender2.Amount
+	lending.Save()
+
+	if !lending.Status && lending.Amount == lending.AlreadyInvested {
 		fmt.Println("[*] Transfering...")
 		lending.Transfer()
 	}
+	// ----------------------------------------
+
+
 
 	// ----------------------------------------
 	fmt.Println("Lending Status: ", lending.Status)
@@ -88,4 +93,5 @@ func main() {
 	fmt.Println("User 2 Balance: ", models.GetUserById(user2.ID).Balance)
 
 	fmt.Println("User 3 Balance: ", models.GetUserById(user3.ID).Balance)
+	// ----------------------------------------
 }

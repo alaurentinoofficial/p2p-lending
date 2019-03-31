@@ -40,7 +40,8 @@ func init() {
 	db.DropTableIfExists("users")
 	db.DropTableIfExists("lendings")
 	db.DropTableIfExists("lenders")
-	db.AutoMigrate(&User{}, &Lending{}, &Lender{})
+	db.DropTableIfExists("statements")
+	db.AutoMigrate(&User{}, &Lending{}, &Lender{}, &Statement{})
 }
 
 func GetDB() *gorm.DB {

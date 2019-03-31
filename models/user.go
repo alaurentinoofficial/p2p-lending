@@ -49,8 +49,9 @@ func GetUserById(id string) *User {
 	return &user
 }
 
-func UserCheckBalance(user string, amount float32) bool {
-	return true
+func UserCheckBalance(userID string, amount float32) bool {
+	user := GetUserById(userID)
+	return user.Balance - amount > 0
 }
 
 func UserLend(userID string, amount float32, lending *Lending) {
@@ -58,10 +59,13 @@ func UserLend(userID string, amount float32, lending *Lending) {
 	user := GetUserById(userID)
 
 	// Remove money
-	fmt.Println(user.Balance)
+	fmt.Println("User: ", user.ID)
+	fmt.Println("Before: ", user.Balance)
+
 	user.Balance -= amount
-	fmt.Println(user.Balance)
 	user.Save()
+
+	fmt.Println("After: ", user.Balance, "\n")
 
 	// Create a statement
 	statement := Statement{Title: "Transferência de empréstimo", User: userID, Amount: amount, Type: types.Statement.Out}
@@ -72,9 +76,14 @@ func UserTake(userID string, lending *Lending) {
 	// Find user in database
 	user := GetUserById(userID)
 
+	fmt.Println("User: ", user.ID)
+	fmt.Println("Before: ", user.Balance)
+
 	// Remove money
 	user.Balance += lending.Amount
 	user.Save()
+
+	fmt.Println("After: ", user.Balance, "\n")
 
 	// Create a statement
 	statement := Statement{Title: "Transferência de empréstimo", User: userID, Amount: lending.Amount, Type: types.Statement.In}
