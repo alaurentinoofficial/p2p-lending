@@ -3,6 +3,7 @@ package models
 import (
 	"github.com/jinzhu/gorm"
 	"github.com/satori/go.uuid"
+	"p2p-lending/types"
 	"time"
 )
 
@@ -22,12 +23,32 @@ func (statement *Statement) BeforeCreate(scope *gorm.Scope) error {
 	return nil
 }
 
-func (statement *Statement) Create() {
-	GetDB().Create(&statement)
+func (statement *Statement) Verify() bool {
+	isvalid := true
+
+	isvalid = isvalid && len(statement.Title) > 0
+	isvalid = isvalid && types.Statement.Check(statement.Type)
+	isvalid = isvalid && statement.Amount > 0
+
+	return isvalid
 }
 
-func (statement *Statement) Save() {
-	GetDB().Save(&statement)
+func (statement *Statement) Create() bool {
+	if statement.Verify() {
+		GetDB().Create(&statement)
+		return true
+	} else {
+		return false
+	}
+}
+
+func (statement *Statement) Save() bool {
+	if statement.Verify() {
+		GetDB().Save(&statement)
+		return true
+	} else {
+		return false
+	}
 }
 
 func GetStatementByUser(userID string) []*Statement {
