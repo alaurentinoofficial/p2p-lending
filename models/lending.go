@@ -3,6 +3,7 @@ package models
 import (
 	"github.com/jinzhu/gorm"
 	"github.com/satori/go.uuid"
+	"p2p-lending/types"
 	"time"
 )
 
@@ -15,9 +16,10 @@ type Lending struct {
 	CreationDate    string  `json:"creation_date"`
 	Validate        string  `json:"validate"`
 	TransactionDate string  `json:"transaction_date"`
-	HasIndexer      bool    `json:"has_indexer"`
-	Indexer         string  `json:"indexer"`
-	Yield           float32 `json:"yield"`
+	HasIndex        bool    `json:"has_index"`
+	Index           int  `json:"index"`
+	IndexYield      float32 `json:"index_yield"`
+	PrefixedYield   float32 `json:"prefixed_yield"`
 }
 
 func (lending *Lending) BeforeCreate(scope *gorm.Scope) error {
@@ -27,51 +29,38 @@ func (lending *Lending) BeforeCreate(scope *gorm.Scope) error {
 	return nil
 }
 
-//func (lending *Lending) BeforeSave(scope *gorm.Scope) error {
-//	fmt.Println(lending.Amount == lending.AlreadyInvested)
-//	if !lending.Status && lending.Amount == lending.AlreadyInvested {
-//		lenders := GetLendersByLending(lending.ID)
-//
-//		totalAmount := float32(0)
-//		for _, lender := range lenders {
-//			// Check if the all lenders has balance
-//			if UserCheckBalance(lender.User, lender.Amount) {
-//				// Sum in the total
-//				totalAmount += lender.Amount
-//			} else {
-//				// Delete lender
-//				DeleteLender(lender.ID, lending.ID, lending)
-//			}
-//		}
-//
-//		if totalAmount == lending.Amount {
-//
-//			// Reduce balance from users
-//			for _, lender := range lenders {
-//				UserLend(lender.User, lender.Amount, lending)
-//
-//				lender.Status = true
-//				lender.Save()
-//			}
-//
-//			// Transfer to taker
-//			UserTake(lending.Taker, lending)
-//
-//			// Save configurations
-//			lending.Status = true
-//			lending.TransactionDate = time.Now().UTC().String()
-//		}
-//	}
-//
-//	return nil
-//}
+func (lending *Lending) Verify() bool {
+	isvalid := true
 
-func (lending *Lending) Create() {
-	GetDB().Create(&lending)
+	isvalid = isvalid && len(lending.Taker) == len("dc5ccc85-c1ee-41b0-92a5-bd7bae46ad35")
+	isvalid = isvalid && lending.Amount > 1000
+
+	if lending.HasIndex {
+		isvalid = isvalid && types.Index.Check(lending.Index)
+		isvalid = isvalid && lending.IndexYield > 0
+	} else {
+		isvalid = isvalid && lending.PrefixedYield > 0
+	}
+
+	return isvalid
 }
 
-func (lending *Lending) Save() {
-	GetDB().Save(&lending)
+func (lending *Lending) Create() bool {
+	if lending.Verify() {
+		GetDB().Create(&lending)
+		return true
+	} else {
+		return false
+	}
+}
+
+func (lending *Lending) Save() bool {
+	if lending.Verify() {
+		GetDB().Save(&lending)
+		return true
+	} else {
+		return false
+	}
 }
 
 func (lending *Lending) Transfer() bool {

@@ -65,10 +65,10 @@ func main() {
 	lending := models.Lending{
 		Taker: user1.ID,
 		AlreadyInvested: 0,
-		Amount: float32(12000),
-		HasIndexer: false,
-		Indexer: "NONE",
-		Yield: float32(2.5),
+		Amount: 12000,
+		HasIndex: false,
+		Index: -1,
+		PrefixedYield: 2.5,
 		Validate: time.Now().AddDate(0,1, 0).String(),
 		Status: false,
 	}
