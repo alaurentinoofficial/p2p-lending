@@ -72,7 +72,7 @@ func GetLenderById(id string) *Lender {
 
 func GetLendersByUser(userID string) []*Lender {
 	var lenders []*Lender
-	GetDB().Table("lenders").Where("user = ?", userID).Find(&lenders)
+	GetDB().Where(&Lender{User: userID}).Find(&lenders)
 	return lenders
 }
 

@@ -29,6 +29,8 @@ func main() {
 	r.HandleFunc("/lenders", controllers.GetLenders).Methods("GET")
 	r.HandleFunc("/lenders", controllers.AddLender).Methods("POST")
 
+	r.HandleFunc("/statements", controllers.GetStatements).Methods("GET")
+
 	r.Use(middlewares.JwtAuthentication)
 
 	if os.Getenv("PORT") != "" {
