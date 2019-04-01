@@ -1,12 +1,18 @@
 package models
 
 import (
+	"github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
 	"github.com/satori/go.uuid"
 	"p2p-lending/types"
 	"strings"
 	"time"
 )
+
+type Token struct {
+	UserId string
+	jwt.StandardClaims
+}
 
 type User struct {
 	ID           string  `json:"id" gorm:"primary_key;"`
