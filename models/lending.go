@@ -17,12 +17,13 @@ type Lending struct {
 	CreationDate        string  `json:"creation_date"`
 	Validate            string  `json:"validate"`
 	TransactionDate     string  `json:"transaction_date"`
+	PrefixedYield       float32 `json:"prefixed_yield"`
+	MonthlyInterestRate float32 `json:"monthly_interest_rate"`
+	PortionAlreadyPayed int     `json:"portion_already_payed"`
+	PaymentTimeMonth    int     `json:"payment_time_month"`
 	//HasIndex            bool    `json:"has_index"`
 	//Index               int     `json:"index"`
 	//IndexYield          float32 `json:"index_yield"`
-	PrefixedYield       float32 `json:"prefixed_yield"`
-	MonthlyInterestRate float32 `json:"monthly_interest_rate"`
-	PaymentTimeMonth    int     `json:"payment_time_month"`
 }
 
 func (lending *Lending) BeforeCreate(scope *gorm.Scope) error {
@@ -30,6 +31,7 @@ func (lending *Lending) BeforeCreate(scope *gorm.Scope) error {
 	_ = scope.SetColumn("ID", uu.String())
 	_ = scope.SetColumn("Status", false)
 	_ = scope.SetColumn("AlreadyInvested", 0)
+	_ = scope.SetColumn("PortionAlreadyPayed", 0)
 	_ = scope.SetColumn("CreationDate", time.Now().UTC().Format(time.RFC3339))
 	_ = scope.SetColumn("Validate", time.Now().UTC().AddDate(0, 1, 0).Format(time.RFC3339))
 	return nil
@@ -113,17 +115,17 @@ func (lending *Lending) Transfer() bool {
 
 			// PREFIXED YIELD
 			total := math.Round(float64(lending.Amount * (1 + lending.PrefixedYield/100)))
-			monthlyPayment := Round(total / float64(lending.PaymentTimeMonth), .5, 2)
+			monthlyPayment := Round(total/float64(lending.PaymentTimeMonth), .5, 2)
 
 			for i := 1; i <= lending.PaymentTimeMonth; i++ {
 				payment := LendingPayment{
-					Taker: lending.Taker,
-					Lending: lending.ID,
-					Total: lending.Amount,
-					Value: float32(monthlyPayment),
-					Portion: i,
-					LastPortion: i == lending.PaymentTimeMonth,
-					Validate: time.Now().UTC().AddDate(0, i, 0).Format(time.RFC3339),
+					Taker:               lending.Taker,
+					Lending:             lending.ID,
+					Total:               lending.Amount,
+					Value:               float32(monthlyPayment),
+					Portion:             i,
+					LastPortion:         i == lending.PaymentTimeMonth,
+					Validate:            time.Now().UTC().AddDate(0, i, 0).Format(time.RFC3339),
 					MonthlyInterestRate: lending.MonthlyInterestRate,
 				}
 				payment.Create()
@@ -157,7 +159,7 @@ func DeleteLending(id string) {
 	GetDB().Table("lendings").Where("id=?", id).Delete(&Lending{})
 }
 
-func Round(val float64, roundOn float64, places int ) (newVal float64) {
+func Round(val float64, roundOn float64, places int) (newVal float64) {
 	var round float64
 	pow := math.Pow(10, float64(places))
 	digit := pow * val

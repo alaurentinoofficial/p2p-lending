@@ -18,6 +18,8 @@ func init() {
 	ResponseMap[2] = "Invalid Arguments"
 	ResponseMap[3] = "Not Found"
 	ResponseMap[4] = "Already Exists"
+	ResponseMap[5] = "Insufficient Funds"
+	ResponseMap[6] = "Pay Previous Portions"
 }
 
 func Response(w http.ResponseWriter, status int, code int) {

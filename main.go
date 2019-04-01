@@ -8,6 +8,7 @@ import (
 	"p2p-lending/controllers"
 	"p2p-lending/middlewares"
 	"p2p-lending/models"
+	"p2p-lending/utils"
 	"time"
 )
 
@@ -33,6 +34,8 @@ func main() {
 	if os.Getenv("PORT") != "" {
 		port = ":" + os.Getenv("PORT")
 	}
+
+	simulate()
 
 	fmt.Println("[*] Listening in ", port)
 	_ = http.ListenAndServe(port, r)
@@ -142,8 +145,10 @@ func simulate() {
 
 	fmt.Println()
 	for i, payment := range payments {
-		taker.Pay(payment.ID)
-		fmt.Println("[*] Payment month: ", i)
+		if i != 12 {
+			fmt.Println("[*] Payment month: ", utils.ResponseMap[taker.Pay(payment.ID)])
+		}
+		//fmt.Println("[*] Payment month: ", i)
 		time.Sleep(time.Millisecond * 300)
 	}
 	// ----------------------------------------

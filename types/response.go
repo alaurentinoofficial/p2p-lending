@@ -1,11 +1,21 @@
 package types
 
 type responseType struct {
-	Ok               int
-	Unauthorized     int
-	InvalidArguments int
-	NotFound         int
-	AlreadyExists    int
+	Ok                  int
+	Unauthorized        int
+	InvalidArguments    int
+	NotFound            int
+	AlreadyExists       int
+	InsufficientFunds   int
+	PayPreviousPortions int
 }
 
-var Response = responseType{0, 1, 2, 3, 4}
+var Response = responseType{
+	0,
+	1,
+	2,
+	3,
+	4,
+	5,
+	6,
+}

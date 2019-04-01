@@ -87,19 +87,27 @@ func (user *User) Verify() bool {
 	return isvalid
 }
 
-func (user *User) Pay(paymentID string) bool {
+func (user *User) Pay(paymentID string) int {
 	payment := GetLendingPayment(paymentID)
+	lending := GetLendingById(payment.Lending)
 	price := payment.CalculatePrice()
 
-	if user.Balance-price >= 0 {
-		user.Balance = float32(Round(float64(user.Balance-price), .5, 2))
-		user.Save()
+	if lending.PortionAlreadyPayed+1 == payment.Portion {
+		if user.Balance-price >= 0 {
+			user.Balance = float32(Round(float64(user.Balance-price), .5, 2))
+			user.Save()
 
-		payment.Pay()
-		return true
+			lending.PortionAlreadyPayed += 1
+			lending.Save()
+
+			payment.Pay()
+			return types.Response.Ok
+		}
+
+		return types.Response.InsufficientFunds
 	}
 
-	return false
+	return types.Response.PayPreviousPortions
 }
 
 func GetUserById(id string) *User {
