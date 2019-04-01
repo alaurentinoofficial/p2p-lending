@@ -15,6 +15,7 @@ type User struct {
 	Password     string  `json:"password"`
 	CreationDate string  `json:"creation_date"`
 	Type         int     `json:"types"`
+	Salary       float32 `json:"salary"`
 	Score        int     `json:"score"`
 	CpfCnpj      string  `json:"cpf_cpnj"`
 	Balance      float32 `json:"balance"`
@@ -65,6 +66,7 @@ func (user *User) Verify() bool {
 	}
 
 	isvalid = isvalid && user.Score >= 0 && user.Score <= 1000
+	isvalid = isvalid && user.Salary >= 0
 
 	isvalid = isvalid && len(user.State) > 0
 	isvalid = isvalid && len(user.City) > 0
@@ -79,8 +81,8 @@ func (user *User) Pay(paymentID string) bool {
 	payment := GetLendingPayment(paymentID)
 	price := payment.CalculatePrice()
 
-	if user.Balance - price >= 0 {
-		user.Balance = float32(Round(float64(user.Balance - price), .5, 2))
+	if user.Balance-price >= 0 {
+		user.Balance = float32(Round(float64(user.Balance-price), .5, 2))
 		user.Save()
 
 		payment.Pay()
