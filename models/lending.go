@@ -123,6 +123,7 @@ func (lending *Lending) Transfer() bool {
 					Portion: i,
 					LastPortion: i == lending.PaymentTimeMonth,
 					Validate: time.Now().UTC().AddDate(0, i, 0).Format(time.RFC3339),
+					MonthlyInterestRate: lending.MonthlyInterestRate,
 				}
 				payment.Create()
 			}

@@ -3,23 +3,25 @@ package models
 import (
 	"github.com/jinzhu/gorm"
 	"github.com/satori/go.uuid"
+	"math"
 	"os"
 	"strconv"
 	"time"
 )
 
 type LendingPayment struct {
-	ID            string  `json:"id" gorm:"primary_key;"`
-	Lending       string  `json:"lending"`
-	Taker         string  `json:"taker"`
-	Validate      string  `json:"validate"`
-	Value         float32 `json:"value"`
-	Total         float32 `json:"total"`
-	Portion       int     `json:"Portion"`
-	MonthlyDelays int     `json:"monthly_delays"`
-	Status        bool    `json:"status"`
-	PaymentDate   string  `json:"payment_day"`
-	LastPortion   bool    `json:"last_portion"`
+	ID                  string  `json:"id" gorm:"primary_key;"`
+	Lending             string  `json:"lending"`
+	Taker               string  `json:"taker"`
+	Validate            string  `json:"validate"`
+	Value               float32 `json:"value"`
+	Total               float32 `json:"total"`
+	Portion             int     `json:"Portion"`
+	MonthlyInterestRate float32 `json:"monthly_interest_rate"`
+	MonthlyDelays       int     `json:"monthly_delays"`
+	Status              bool    `json:"status"`
+	PaymentDate         string  `json:"payment_day"`
+	LastPortion         bool    `json:"last_portion"`
 }
 
 func (payment *LendingPayment) BeforeCreate(scope *gorm.Scope) error {
@@ -78,6 +80,23 @@ func (payment *LendingPayment) Pay() {
 	}
 }
 
+func (payment *LendingPayment) CalculatePrice() float32 {
+	validate, _ := time.Parse(time.RFC3339, payment.Validate)
+	months := monthsCountSince(validate)
+
+	if payment.MonthlyDelays != months {
+		payment.MonthlyDelays = months
+		payment.Save()
+	}
+
+	if months == 0 {
+		// Normal Value
+		return payment.Value
+	} else {
+		return payment.Value * float32(math.Pow(float64(payment.MonthlyInterestRate/100+1.0), float64(months)))
+	}
+}
+
 func GetLendingPayment(id string) *LendingPayment {
 	lendingPayment := LendingPayment{}
 	GetDB().Table("lending_payments").Where("id = ?", id).First(&lendingPayment)
@@ -88,4 +107,29 @@ func GetLendingPaymentsByTaker(takerID string) []*LendingPayment {
 	lendingPayments := []*LendingPayment{}
 	GetDB().Table("lending_payments").Where("taker = ?", takerID).Find(&lendingPayments)
 	return lendingPayments
+}
+
+func monthsCountSince(createdAtTime time.Time) int {
+	now := time.Now().UTC()
+	months := 0
+	month := createdAtTime.Month()
+	days := 0
+
+	for createdAtTime.Before(now) {
+		createdAtTime = createdAtTime.Add(time.Hour * 24)
+		nextMonth := createdAtTime.Month()
+		if nextMonth != month {
+			months++
+			days = 0
+		} else {
+			days++
+		}
+		month = nextMonth
+	}
+
+	if months == 0 && days > 0 {
+		return 1
+	}
+
+	return months
 }

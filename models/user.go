@@ -77,9 +77,10 @@ func (user *User) Verify() bool {
 
 func (user *User) Pay(paymentID string) bool {
 	payment := GetLendingPayment(paymentID)
+	price := payment.CalculatePrice()
 
-	if user.Balance - payment.Value >= 0 {
-		user.Balance =  float32(Round(float64(user.Balance - payment.Value), .5, 2))
+	if user.Balance - price >= 0 {
+		user.Balance = float32(Round(float64(user.Balance - price), .5, 2))
 		user.Save()
 
 		payment.Pay()
