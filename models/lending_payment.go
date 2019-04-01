@@ -64,13 +64,11 @@ func (payment *LendingPayment) Pay() {
 	payment.Status = true
 	payment.Save()
 
-	if payment.LastPortion {
-		total := payment.Value * float32(payment.Portion)
-		lenders := GetLendersByLending(payment.Lending)
+	total := payment.Value
+	lenders := GetLendersByLending(payment.Lending)
 
-		for _, lender := range lenders {
-			UserInsertMoney(lender.User, float32(Round(float64(total*(lender.Amount/payment.Total)), .5, 2)), "Recebimento do empréstimo + Juros")
-		}
+	for _, lender := range lenders {
+		UserInsertMoney(lender.User, float32(Round(float64(total*(lender.Amount/payment.Total)), .5, 2)), "Recebimento do empréstimo + Juros")
 	}
 }
 
