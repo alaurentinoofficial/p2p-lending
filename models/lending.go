@@ -144,6 +144,13 @@ func GetLendingById(id string) *Lending {
 	return &lending
 }
 
+func GetLendings() []*Lending {
+	lendings := []*Lending{}
+	GetDB().Table("lendings").Find(&lendings)
+
+	return lendings
+}
+
 func DeleteLending(id string) {
 	fmt.Println("[*] Lending Expired!")
 	GetDB().Table("lendings").Where("id=?", id).Delete(&Lending{})
