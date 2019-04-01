@@ -91,13 +91,12 @@ func (lending *Lending) Transfer() bool {
 			totalAmount += lender.Amount
 		} else {
 			// Delete lender
-			DeleteLender(lender.ID, lending.ID, lending)
+			DeleteLender(lender.ID)
 			return false
 		}
 	}
 
 	// Check all money received and check the date
-	fmt.Println(totalAmount)
 	if totalAmount == lending.Amount {
 		// Convert the validate date to time.Date
 		validate, _ := time.Parse(time.RFC3339, lending.Validate)

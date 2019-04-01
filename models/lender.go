@@ -26,11 +26,24 @@ func (lender *Lender) BeforeCreate(scope *gorm.Scope) error {
 func (lender *Lender) AfterCreate(scope *gorm.Scope) error {
 	scope.CommitOrRollback()
 
+	// Increase the Amount Already Invested
 	lending := GetLendingById(lender.Lending)
 	lending.AlreadyInvested += lender.Amount
 	lending.Save()
 
-	lending.Transfer()
+	// Hook to Transfer
+	if lending.Amount == lending.AlreadyInvested {
+		lending.Transfer()
+	}
+
+	return nil
+}
+
+func (lender *Lender) AfterDelete(scope *gorm.Scope) error {
+	// Decrease the Amount Already Invested
+	lending := GetLendingById(lender.Lending)
+	lending.AlreadyInvested -= lender.Amount
+	lending.Save()
 
 	return nil
 }
@@ -97,14 +110,6 @@ func GetLendersByLending(lendingID string) []*Lender {
 	return lenders
 }
 
-func DeleteLender(id string, lenderingID string, lending *Lending) {
-
-	if lending == nil {
-		lending = GetLendingById(lenderingID)
-	}
-
-	lending.AlreadyInvested -= GetLenderById(id).Amount
-	lending.Save()
-
-	GetDB().Table("lenders").Where("id = ?", id).Delete(&Lender{})
+func DeleteLender(id string) {
+	GetDB().Delete(GetLenderById(id))
 }
