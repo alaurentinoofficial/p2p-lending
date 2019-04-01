@@ -108,6 +108,22 @@ func (lending *Lending) Transfer() bool {
 			lending.Status = true
 			lending.TransactionDate = time.Now().UTC().String()
 			lending.Save()
+
+			// PREFIXED YIELD
+			monthlyPayment := lending.Amount / float32(lending.PaymentTimeMonth)
+
+
+			for i := 1; i <= lending.PaymentTimeMonth; i++ {
+				payment := LendingPayment{
+					Taker: lending.Taker,
+					Lending: lending.ID,
+					Value: monthlyPayment,
+					Portion: i,
+					Validate: time.Now().UTC().AddDate(0, i, 0).Format(time.RFC3339),
+				}
+				payment.Create()
+			}
+
 			return true
 		} else if time.Now().UTC().After(validate) {
 			DeleteLending(lending.ID)

@@ -3,18 +3,19 @@ package models
 import (
 	"github.com/jinzhu/gorm"
 	"github.com/satori/go.uuid"
+	"p2p-lending/types"
 )
 
 type LendingPayment struct {
-	ID            string  `json:"id" gorm:"primary_key;"`
-	Lending       string  `json:"lending"`
-	Taker         string  `json:"taker"`
-	Validate      string  `json:"validate"`
-	Value         float32 `json:"value"`
-	Portion       int     `json:"Portion"`
-	MonthlyDelays int     `json:"monthly_delays"`
-	Status        bool    `json:"status"`
-	PaymentDate   string  `json:"payment_day"`
+	ID                  string  `json:"id" gorm:"primary_key;"`
+	Lending             string  `json:"lending"`
+	Taker               string  `json:"taker"`
+	Validate            string  `json:"validate"`
+	Value               float32 `json:"value"`
+	Portion             int     `json:"Portion"`
+	MonthlyDelays       int     `json:"monthly_delays"`
+	Status              bool    `json:"status"`
+	PaymentDate         string  `json:"payment_day"`
 }
 
 func (payment *LendingPayment) BeforeCreate(scope *gorm.Scope) error {
@@ -43,7 +44,7 @@ func (payment *LendingPayment) Create() bool {
 		GetDB().Create(payment)
 		return true
 	} else {
-		return  false
+		return false
 	}
 }
 
@@ -52,6 +53,16 @@ func (payment *LendingPayment) Save() bool {
 		GetDB().Save(payment)
 		return true
 	} else {
-		return  false
+		return false
+	}
+}
+
+func (payment *LendingPayment) CalculatePrice() float32 {
+	lending := GetLendingById(payment.Lending)
+
+	if lending.HasIndex {
+		return payment.Value * (1 + (((types.Index.Porcentage(lending.Index) / 100) / 12) * lending.IndexYield))
+	} else {
+		return payment.Value * (1 + ((lending.PrefixedYield / 100) / 12))
 	}
 }

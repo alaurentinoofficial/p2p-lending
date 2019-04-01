@@ -69,6 +69,7 @@ func main() {
 		Index: -1,
 		PrefixedYield: 2.5,
 		PaymentTimeMonth: 12,
+		MonthlyInterestRate: 1.7,
 	}
 	lending.Create()
 	// ----------------------------------------
@@ -77,7 +78,6 @@ func main() {
 	lender1 := models.Lender{
 		User: user2.ID,
 		Amount: float32(5000),
-		Status: false,
 		Lending: lending.ID,
 	}
 	lender1.Create()
@@ -85,7 +85,6 @@ func main() {
 	lender2 := models.Lender{
 		User: user3.ID,
 		Amount: float32(7000),
-		Status: false,
 		Lending: lending.ID,
 	}
 	lender2.Create()
