@@ -15,10 +15,6 @@ type Token struct {
 	jwt.StandardClaims
 }
 
-type TokenResponse struct {
-	Token string `json:"token"`
-}
-
 type User struct {
 	ID           string  `json:"id" gorm:"primary_key;"`
 	Name         string  `json:"name"`

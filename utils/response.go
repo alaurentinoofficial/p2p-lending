@@ -15,12 +15,13 @@ var ResponseMap = make(map[int]string)
 func init() {
 	ResponseMap[0] = "Successfully"
 	ResponseMap[1] = "Unauthorized"
-	ResponseMap[2] = "Invalid Arguments"
-	ResponseMap[3] = "Not Found"
-	ResponseMap[4] = "Already Exists"
-	ResponseMap[5] = "Insufficient Funds"
-	ResponseMap[6] = "Pay Previous Portions"
-	ResponseMap[7] = "Payment Ceiling"
+	ResponseMap[2] = "Invalid arguments"
+	ResponseMap[3] = "Email or Password invalid"
+	ResponseMap[4] = "Not found"
+	ResponseMap[5] = "Already exists"
+	ResponseMap[6] = "Insufficient funds"
+	ResponseMap[7] = "Pay previous portions"
+	ResponseMap[8] = "Payment ceiling"
 }
 
 func Response(w http.ResponseWriter, status int, code int) {

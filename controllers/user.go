@@ -17,7 +17,7 @@ func Login (w http.ResponseWriter, r *http.Request) {
 	parser := &models.User{}
 	err := json.NewDecoder(r.Body).Decode(parser) //decode the request body into struct and failed if any error occur
 	if err != nil {
-		utils.Response(w, http.StatusNotAcceptable, types.Response.InvalidArguments)
+		utils.Response(w, http.StatusNotAcceptable, types.Response.EmailOrPasswordInvalid)
 		return
 	}
 
@@ -31,7 +31,7 @@ func Login (w http.ResponseWriter, r *http.Request) {
 		//	utils.Response(w, http.StatusNotFound, types.Response.NotFound)
 		//	return
 		//}
-		utils.Response(w, http.StatusNotFound, types.Response.NotFound)
+		utils.Response(w, http.StatusNotFound, types.Response.EmailOrPasswordInvalid)
 		return
 	}
 
@@ -39,7 +39,7 @@ func Login (w http.ResponseWriter, r *http.Request) {
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword { //Password does not match!
-		utils.Response(w, http.StatusNotFound, types.Response.NotFound)
+		utils.Response(w, http.StatusNotFound, types.Response.EmailOrPasswordInvalid)
 		return
 	}
 
@@ -48,7 +48,11 @@ func Login (w http.ResponseWriter, r *http.Request) {
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
 	tokenString, _ := token.SignedString([]byte(os.Getenv("TOKEN_PASSWORD")))
 
-	utils.ResponseJson(w, http.StatusNotAcceptable, models.TokenResponse{Token: tokenString})
+	var result = struct{
+		Token string `json:"token"`
+	}{tokenString}
+
+	utils.ResponseJson(w, http.StatusNotAcceptable, result)
 }
 
 func GetUser(w http.ResponseWriter, req *http.Request) {
