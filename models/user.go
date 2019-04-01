@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/satori/go.uuid"
 	"p2p-lending/types"
@@ -76,6 +75,20 @@ func (user *User) Verify() bool {
 	return isvalid
 }
 
+func (user *User) Pay(paymentID string) bool {
+	payment := GetLendingPayment(paymentID)
+
+	if user.Balance - payment.Value >= 0 {
+		user.Balance =  float32(Round(float64(user.Balance - payment.Value), .5, 2))
+		user.Save()
+
+		payment.Pay()
+		return true
+	}
+
+	return false
+}
+
 func GetUserById(id string) *User {
 	user := User{}
 	GetDB().Table("users").Where("id = ?", id).First(&user)
@@ -88,38 +101,28 @@ func UserCheckBalance(userID string, amount float32) bool {
 	return user.Balance-amount >= 0
 }
 
-func UserLend(userID string, amount float32, lending *Lending) {
+func UserRemoveMoney(userID string, amount float32, title string) {
 	// Find user in database
 	user := GetUserById(userID)
 
 	// Remove money
-	fmt.Println("User: ", user.ID)
-	fmt.Println("Before: ", user.Balance)
-
 	user.Balance -= amount
 	user.Save()
 
-	fmt.Println("After: ", user.Balance, "\n")
-
 	// Create a statement
-	statement := Statement{Title: "Transferência de empréstimo", User: userID, Amount: amount, Type: types.Statement.Out}
+	statement := Statement{Title: title, User: userID, Amount: amount, Type: types.Statement.Out}
 	statement.Create()
 }
 
-func UserTake(userID string, lending *Lending) {
+func UserInsertMoney(userID string, amount float32, title string) {
 	// Find user in database
 	user := GetUserById(userID)
 
-	fmt.Println("User: ", user.ID)
-	fmt.Println("Before: ", user.Balance)
-
-	// Remove money
-	user.Balance += lending.Amount
+	// Add money
+	user.Balance += amount
 	user.Save()
 
-	fmt.Println("After: ", user.Balance, "\n")
-
 	// Create a statement
-	statement := Statement{Title: "Transferência de empréstimo", User: userID, Amount: lending.Amount, Type: types.Statement.In}
+	statement := Statement{Title: title, User: userID, Amount: amount, Type: types.Statement.In}
 	statement.Create()
 }

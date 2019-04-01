@@ -14,7 +14,7 @@ func main() {
 		Type: 0,
 		CpfCnpj: "12345678901",
 		Score: 967,
-		Balance: float32(0),
+		Balance: float32(10000),
 		State: "PE",
 		City: "Recife",
 		Neighborhood: "Boa vista",
@@ -31,7 +31,7 @@ func main() {
 		Type: 0,
 		CpfCnpj: "12345678901",
 		Score: 967,
-		Balance: float32(10000),
+		Balance: float32(3000),
 		State: "PE",
 		City: "Recife",
 		Neighborhood: "Boa vista",
@@ -64,20 +64,22 @@ func main() {
 	lending := models.Lending{
 		Taker: user1.ID,
 		AlreadyInvested: 0,
-		Amount: 12000,
+		Amount: 10000,
 		HasIndex: false,
-		Index: -1,
-		PrefixedYield: 2.5,
+		Index: 0,
+		IndexYield: 1,
+		PrefixedYield: 10,
 		PaymentTimeMonth: 12,
 		MonthlyInterestRate: 1.7,
 	}
 	lending.Create()
 	// ----------------------------------------
 
+
 	// -------------[ Lenders ]----------------
 	lender1 := models.Lender{
 		User: user2.ID,
-		Amount: float32(5000),
+		Amount: float32(3000),
 		Lending: lending.ID,
 	}
 	lender1.Create()
@@ -90,10 +92,26 @@ func main() {
 	lender2.Create()
 	// ----------------------------------------
 
-	// ----------------------------------------
-	fmt.Println("Lending Status: ", lending.Status)
 
-	fmt.Println("\nUser 1 Balance: ", user1.Balance, "\t\t-> ", models.GetUserById(user1.ID).Balance)
+	// ----------------------------------------
+	fmt.Println("\nUser 1 Balance: ", user1.Balance, "\t-> ", models.GetUserById(user1.ID).Balance)
+	fmt.Println("User 2 Balance: ", user2.Balance, "\t-> ",  models.GetUserById(user2.ID).Balance)
+	fmt.Println("User 3 Balance: ", user3.Balance, "\t-> ",  models.GetUserById(user3.ID).Balance)
+	// ----------------------------------------
+
+
+	// --------------[ Payment ]---------------
+	payments := models.GetLendingPaymentsByTaker(user1.ID)
+	taker := models.GetUserById(user1.ID)
+
+	for _, payment := range payments {
+		taker.Pay(payment.ID)
+	}
+	// ----------------------------------------
+
+
+	// ----------------------------------------
+	fmt.Println("\nUser 1 Balance: ", user1.Balance, "\t-> ", models.GetUserById(user1.ID).Balance)
 	fmt.Println("User 2 Balance: ", user2.Balance, "\t-> ",  models.GetUserById(user2.ID).Balance)
 	fmt.Println("User 3 Balance: ", user3.Balance, "\t-> ",  models.GetUserById(user3.ID).Balance)
 	// ----------------------------------------

@@ -19,7 +19,7 @@ var Index = indexType{
 func (obj *indexType) Porcentage(index int) float32 {
 	switch index {
 	case obj.SELIC:
-		return 6.4
+		return 6.5
 	case obj.IPCA:
 		return 3.86
 	case obj.CDI:

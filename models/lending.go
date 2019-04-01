@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"github.com/satori/go.uuid"
+	"math"
 	"p2p-lending/types"
 	"time"
 )
@@ -95,14 +96,14 @@ func (lending *Lending) Transfer() bool {
 		if time.Now().UTC().Before(validate) {
 			// Reduce balance from users
 			for _, lender := range lenders {
-				UserLend(lender.User, lender.Amount, lending)
+				UserRemoveMoney(lender.User, lender.Amount, "Transferência de empréstimo")
 
 				lender.Status = true
 				lender.Save()
 			}
 
 			// Transfer to taker
-			UserTake(lending.Taker, lending)
+			UserInsertMoney(lending.Taker, lending.Amount, "Transferência de empréstimo")
 
 			// Save configurations
 			lending.Status = true
@@ -110,15 +111,17 @@ func (lending *Lending) Transfer() bool {
 			lending.Save()
 
 			// PREFIXED YIELD
-			monthlyPayment := lending.Amount / float32(lending.PaymentTimeMonth)
-
+			total := math.Round(float64(lending.Amount * (1 + lending.PrefixedYield/100)))
+			monthlyPayment := Round(total / float64(lending.PaymentTimeMonth), .5, 2)
 
 			for i := 1; i <= lending.PaymentTimeMonth; i++ {
 				payment := LendingPayment{
 					Taker: lending.Taker,
 					Lending: lending.ID,
-					Value: monthlyPayment,
+					Total: lending.Amount,
+					Value: float32(monthlyPayment),
 					Portion: i,
+					LastPortion: i == lending.PaymentTimeMonth,
 					Validate: time.Now().UTC().AddDate(0, i, 0).Format(time.RFC3339),
 				}
 				payment.Create()
@@ -143,4 +146,18 @@ func GetLendingById(id string) *Lending {
 func DeleteLending(id string) {
 	fmt.Println("[*] Lending Expired!")
 	GetDB().Table("lendings").Where("id=?", id).Delete(&Lending{})
+}
+
+func Round(val float64, roundOn float64, places int ) (newVal float64) {
+	var round float64
+	pow := math.Pow(10, float64(places))
+	digit := pow * val
+	_, div := math.Modf(digit)
+	if div >= roundOn {
+		round = math.Ceil(digit)
+	} else {
+		round = math.Floor(digit)
+	}
+	newVal = round / pow
+	return
 }

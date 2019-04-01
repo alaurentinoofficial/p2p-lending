@@ -3,19 +3,21 @@ package models
 import (
 	"github.com/jinzhu/gorm"
 	"github.com/satori/go.uuid"
-	"p2p-lending/types"
+	"time"
 )
 
 type LendingPayment struct {
-	ID                  string  `json:"id" gorm:"primary_key;"`
-	Lending             string  `json:"lending"`
-	Taker               string  `json:"taker"`
-	Validate            string  `json:"validate"`
-	Value               float32 `json:"value"`
-	Portion             int     `json:"Portion"`
-	MonthlyDelays       int     `json:"monthly_delays"`
-	Status              bool    `json:"status"`
-	PaymentDate         string  `json:"payment_day"`
+	ID            string  `json:"id" gorm:"primary_key;"`
+	Lending       string  `json:"lending"`
+	Taker         string  `json:"taker"`
+	Validate      string  `json:"validate"`
+	Value         float32 `json:"value"`
+	Total         float32 `json:"total"`
+	Portion       int     `json:"Portion"`
+	MonthlyDelays int     `json:"monthly_delays"`
+	Status        bool    `json:"status"`
+	PaymentDate   string  `json:"payment_day"`
+	LastPortion   bool    `json:"last_portion"`
 }
 
 func (payment *LendingPayment) BeforeCreate(scope *gorm.Scope) error {
@@ -57,12 +59,29 @@ func (payment *LendingPayment) Save() bool {
 	}
 }
 
-func (payment *LendingPayment) CalculatePrice() float32 {
-	lending := GetLendingById(payment.Lending)
+func (payment *LendingPayment) Pay() {
+	payment.PaymentDate = time.Now().UTC().Format(time.RFC3339)
+	payment.Status = true
+	payment.Save()
 
-	if lending.HasIndex {
-		return payment.Value * (1 + (((types.Index.Porcentage(lending.Index) / 100) / 12) * lending.IndexYield))
-	} else {
-		return payment.Value * (1 + ((lending.PrefixedYield / 100) / 12))
+	if payment.LastPortion {
+		total := payment.Value * float32(payment.Portion)
+		lenders := GetLendersByLending(payment.Lending)
+
+		for _, lender := range lenders {
+			UserInsertMoney(lender.User, float32(Round(float64(total*(lender.Amount/payment.Total)), .5, 2)), "Recebimento do empréstimo + Juros")
+		}
 	}
+}
+
+func GetLendingPayment(id string) *LendingPayment {
+	lendingPayment := LendingPayment{}
+	GetDB().Table("lending_payments").Where("id = ?", id).First(&lendingPayment)
+	return &lendingPayment
+}
+
+func GetLendingPaymentsByTaker(takerID string) []*LendingPayment {
+	lendingPayments := []*LendingPayment{}
+	GetDB().Table("lending_payments").Where("taker = ?", takerID).Find(&lendingPayments)
+	return lendingPayments
 }
