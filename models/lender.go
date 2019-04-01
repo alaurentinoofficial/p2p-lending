@@ -59,6 +59,11 @@ func (lender *Lender) Verify() int {
 		return types.Response.InvalidArguments
 	}
 
+	lenderDB := GetLendersByLendingNUser(lending.ID, user.ID)
+	if lenderDB.ID != "" {
+		return types.Response.AlreadyExists
+	}
+
 	if lending.Amount - lending.AlreadyInvested >= lender.Amount {
 		if user.Balance - lender.Amount >= 0 {
 			return types.Response.Ok
@@ -101,6 +106,11 @@ func GetLendersByUser(userID string) []*Lender {
 	var lenders []*Lender
 	GetDB().Where(&Lender{User: userID}).Find(&lenders)
 	return lenders
+}
+func GetLendersByLendingNUser(lendingID string, userID string) *Lender {
+	lender := Lender{}
+	GetDB().Where(&Lender{User: userID, Lending: lendingID}).First(&lender)
+	return &lender
 }
 
 func GetLendersByLending(lendingID string) []*Lender {
