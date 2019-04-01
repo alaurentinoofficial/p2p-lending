@@ -90,24 +90,29 @@ func (user *User) Verify() bool {
 func (user *User) Pay(paymentID string) int {
 	payment := GetLendingPayment(paymentID)
 	lending := GetLendingById(payment.Lending)
-	price := payment.CalculatePrice()
 
-	if lending.PortionAlreadyPayed+1 == payment.Portion {
-		if user.Balance-price >= 0 {
-			user.Balance = float32(Round(float64(user.Balance-price), .5, 2))
-			user.Save()
+	if payment.ID != "" && lending.ID != "" && lending.Taker == user.ID {
+		price := payment.CalculatePrice()
 
-			lending.PortionAlreadyPayed += 1
-			lending.Save()
+		if lending.PortionAlreadyPayed+1 == payment.Portion {
+			if user.Balance-price >= 0 {
+				user.Balance = float32(Round(float64(user.Balance-price), .5, 2))
+				user.Save()
 
-			payment.Pay()
-			return types.Response.Ok
+				lending.PortionAlreadyPayed += 1
+				lending.Save()
+
+				payment.Pay()
+				return types.Response.Ok
+			}
+
+			return types.Response.InsufficientFunds
 		}
 
-		return types.Response.InsufficientFunds
+		return types.Response.PayPreviousPortions
 	}
 
-	return types.Response.PayPreviousPortions
+	return types.Response.InvalidArguments
 }
 
 func GetUserById(id string) *User {

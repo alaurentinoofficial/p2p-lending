@@ -21,6 +21,7 @@ func main() {
 	r.HandleFunc("/login", controllers.Login).Methods("POST")
 	r.HandleFunc("/user", controllers.GetUser).Methods("GET")
 	r.HandleFunc("/user/{id}", controllers.GetUserById).Methods("GET")
+	r.HandleFunc("/pay/{paymentID}", controllers.PayLending).Methods("POST")
 
 	r.HandleFunc("/lendings", controllers.GetLendings).Methods("GET")
 	r.HandleFunc("/lendings", controllers.AddLending).Methods("POST")
@@ -146,7 +147,7 @@ func simulate() {
 	fmt.Println()
 	for i, payment := range payments {
 		if i != 12 {
-			fmt.Println("[*] Payment month: ", utils.ResponseMap[taker.Pay(payment.ID)])
+			fmt.Println("[*] Payment month: ", i+1, " -> ", utils.ResponseMap[taker.Pay(payment.ID)])
 		}
 		//fmt.Println("[*] Payment month: ", i)
 		time.Sleep(time.Millisecond * 300)

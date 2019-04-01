@@ -88,3 +88,10 @@ func AddUser(w http.ResponseWriter, req *http.Request) {
 		utils.Response(w, http.StatusNotAcceptable, types.Response.InvalidArguments)
 	}
 }
+
+func PayLending(w http.ResponseWriter, req *http.Request) {
+	user := models.GetUserById(req.Context().Value("user").(string))
+	payment := mux.Vars(req)["id"]
+
+	utils.ResponseJson(w, http.StatusOK, user.Pay(payment))
+}
