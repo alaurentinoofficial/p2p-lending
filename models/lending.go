@@ -140,11 +140,6 @@ func (lending *Lending) Transfer() bool {
 func (lending *Lending) CalculatePrice(validate time.Time) float32 {
 	months := monthsCountSince(validate)
 
-	//if lending.MonthlyDelays != months {
-	//	payment.MonthlyDelays = months
-	//	payment.Save()
-	//}
-
 	if months == 0 {
 		// Normal Value
 		return lending.PortionAmount

@@ -31,10 +31,7 @@ func (payment *LendingPayment) Verify() bool {
 	isvalid := true
 
 	isvalid = isvalid && len(payment.Lending) == len("dc5ccc85-c1ee-41b0-92a5-bd7bae46ad35")
-	//isvalid = isvalid && len(payment.Taker) == len("dc5ccc85-c1ee-41b0-92a5-bd7bae46ad35")
 	isvalid = isvalid && payment.Portion >= 1
-	//isvalid = isvalid && payment.MonthlyDelays >= 0
-	//isvalid = isvalid && payment.Value >= 0
 
 	return isvalid
 }
@@ -73,23 +70,6 @@ func (payment *LendingPayment) Pay(lending Lending) {
 		}
 	}
 }
-
-//func (payment *LendingPayment) CalculatePrice() float32 {
-//	validate, _ := time.Parse(time.RFC3339, payment.Validate)
-//	months := monthsCountSince(validate)
-//
-//	if payment.MonthlyDelays != months {
-//		payment.MonthlyDelays = months
-//		payment.Save()
-//	}
-//
-//	if months == 0 {
-//		// Normal Value
-//		return payment.Value
-//	} else {
-//		return payment.Value * float32(math.Pow(float64(payment.MonthlyInterestRate/100+1.0), float64(months)))
-//	}
-//}
 
 func GetLendingPayment(id string) *LendingPayment {
 	lendingPayment := LendingPayment{}
