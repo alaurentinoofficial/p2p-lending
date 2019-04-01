@@ -24,3 +24,9 @@ func Response(w http.ResponseWriter, status int, code int) {
 	w.Header().Set("Content-Type", "text/json")
 	_ = json.NewEncoder(w).Encode(ResponseType{Message: ResponseMap[code], Code: code})
 }
+
+func ResponseJson(w http.ResponseWriter, status int, obj interface{}) {
+	w.WriteHeader(status)
+	w.Header().Set("Content-Type", "text/json")
+	_ = json.NewEncoder(w).Encode(obj)
+}

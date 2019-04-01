@@ -8,6 +8,12 @@ import (
 	"p2p-lending/utils"
 )
 
+func GetUser(w http.ResponseWriter, req *http.Request) {
+	user := models.GetUserById(req.Context().Value("user").(string))
+
+	utils.ResponseJson(w, http.StatusOK, user)
+}
+
 func AddUser(w http.ResponseWriter, req *http.Request) {
 	user := models.User{}
 	err := json.NewDecoder(req.Body).Decode(&user)
