@@ -9,12 +9,12 @@ import (
 	"p2p-lending/utils"
 )
 
-func getLendings(w http.ResponseWriter, req *http.Request) {
+func GetLendings(w http.ResponseWriter, req *http.Request) {
 	lendings := models.GetLendings()
 	utils.ResponseJson(w, http.StatusOK, lendings)
 }
 
-func getLendingById(w http.ResponseWriter, req *http.Request) {
+func GetLendingById(w http.ResponseWriter, req *http.Request) {
 	lending := models.GetLendingById(mux.Vars(req)["id"])
 
 	if lending.ID != "" {
@@ -31,7 +31,9 @@ func AddLending(w http.ResponseWriter, req *http.Request) {
 	err := json.NewDecoder(req.Body).Decode(&lending)
 	lending.Taker = userID
 
-	if err != nil && lending.Create() {
+	if err == nil && lending.Create() {
 		utils.Response(w, http.StatusOK, types.Response.Ok)
+	} else {
+		utils.Response(w, http.StatusNotAcceptable, types.Response.InvalidArguments)
 	}
 }

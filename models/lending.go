@@ -29,6 +29,7 @@ func (lending *Lending) BeforeCreate(scope *gorm.Scope) error {
 	uu, _ := uuid.NewV4()
 	_ = scope.SetColumn("ID", uu.String())
 	_ = scope.SetColumn("Status", false)
+	_ = scope.SetColumn("AlreadyInvested", 0)
 	_ = scope.SetColumn("CreationDate", time.Now().UTC().Format(time.RFC3339))
 	_ = scope.SetColumn("Validate", time.Now().UTC().AddDate(0, 1, 0).Format(time.RFC3339))
 	return nil

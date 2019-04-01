@@ -20,6 +20,10 @@ func main() {
 	r.HandleFunc("/login", controllers.Login).Methods("POST")
 	r.HandleFunc("/user", controllers.GetUser).Methods("GET")
 
+	r.HandleFunc("/lendings", controllers.GetLendings).Methods("GET")
+	r.HandleFunc("/lendings", controllers.AddLending).Methods("POST")
+	r.HandleFunc("/lendings/{id}", controllers.GetLendingById).Methods("GET")
+
 	r.Use(middlewares.JwtAuthentication)
 
 	if os.Getenv("PORT") != "" {
