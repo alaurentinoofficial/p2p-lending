@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-var port string = ":8080"
+var port = ":8080"
 
 func main() {
 	r := mux.NewRouter()
@@ -19,6 +19,7 @@ func main() {
 	r.HandleFunc("/register", controllers.AddUser).Methods("POST")
 	r.HandleFunc("/login", controllers.Login).Methods("POST")
 	r.HandleFunc("/user", controllers.GetUser).Methods("GET")
+	r.HandleFunc("/user/{id}", controllers.GetUserById).Methods("GET")
 
 	r.HandleFunc("/lendings", controllers.GetLendings).Methods("GET")
 	r.HandleFunc("/lendings", controllers.AddLending).Methods("POST")

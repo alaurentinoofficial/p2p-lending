@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"os"
@@ -55,6 +56,22 @@ func GetUser(w http.ResponseWriter, req *http.Request) {
 
 	if user.ID != "" {
 		utils.ResponseJson(w, http.StatusOK, user)
+	} else {
+		var s struct{}
+		utils.ResponseJson(w, http.StatusOK, s)
+	}
+}
+
+func GetUserById(w http.ResponseWriter, req *http.Request) {
+	user := models.GetUserById(mux.Vars(req)["id"])
+
+	if user.ID != "" {
+		var result = struct{
+			Score int
+			Salary float32
+		}{Score: user.Score, Salary: user.Salary}
+
+		utils.ResponseJson(w, http.StatusOK, result)
 	} else {
 		var s struct{}
 		utils.ResponseJson(w, http.StatusOK, s)
