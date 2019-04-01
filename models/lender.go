@@ -70,6 +70,12 @@ func GetLenderById(id string) *Lender {
 	return &lender
 }
 
+func GetLendersByUser(userID string) *Lender {
+	var lenders []*Lender
+	GetDB().Table("lenders").Where("user = ?", userID).Find(&lenders)
+	return lenders
+}
+
 func GetLendersByLending(lendingID string) []*Lender {
 	var lenders []*Lender
 	GetDB().Table("lenders").Where("lending = ?", lendingID).Find(&lenders)
