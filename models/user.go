@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
 	"github.com/satori/go.uuid"
@@ -98,6 +99,14 @@ func (user *User) Pay(paymentID string) int {
 			if user.Balance-price >= 0 {
 				user.Balance = float32(Round(float64(user.Balance-price), .5, 2))
 				user.Save()
+
+				statement := Statement{
+					Title: fmt.Sprintf("Pagamento de empréstimo  %d/%d", payment.Portion, lending.PaymentTimeMonth),
+					User: user.ID,
+					Amount: price,
+					Type: types.Statement.Out,
+				}
+				statement.Create()
 
 				lending.PortionAlreadyPayed += 1
 				lending.Save()

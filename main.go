@@ -9,7 +9,6 @@ import (
 	"p2p-lending/middlewares"
 	"p2p-lending/models"
 	"p2p-lending/utils"
-	"time"
 )
 
 var port = ":8080"
@@ -150,7 +149,7 @@ func simulate() {
 			fmt.Println("[*] Payment month: ", i+1, " -> ", utils.ResponseMap[taker.Pay(payment.ID)])
 		}
 		//fmt.Println("[*] Payment month: ", i)
-		time.Sleep(time.Millisecond * 300)
+		//time.Sleep(time.Millisecond * 300)
 	}
 	// ----------------------------------------
 
@@ -160,4 +159,8 @@ func simulate() {
 	fmt.Println("User 2 Balance: ", user2.Balance, "\t-> ",  models.GetUserById(user2.ID).Balance)
 	fmt.Println("User 3 Balance: ", user3.Balance, "\t-> ",  models.GetUserById(user3.ID).Balance)
 	// ----------------------------------------
+
+	for _, statement := range models.GetStatementsByUser(user2.ID) {
+		fmt.Println(statement)
+	}
 }

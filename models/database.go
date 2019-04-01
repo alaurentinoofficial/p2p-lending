@@ -40,6 +40,7 @@ func init() {
 	db.DropTableIfExists("users")
 	db.DropTableIfExists("lendings")
 	db.DropTableIfExists("lenders")
+	db.DropTableIfExists("lending_payments")
 	db.DropTableIfExists("statements")
 	db.AutoMigrate(&User{}, &Lending{}, &Lender{}, &LendingPayment{}, &Statement{})
 }

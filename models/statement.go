@@ -9,7 +9,7 @@ import (
 
 type Statement struct {
 	ID            string  `json:"id" gorm:"primary_key;"`
-	Title         string  `json:"Title"`
+	Title         string  `json:"title"`
 	User          string  `json:"user"`
 	Type          int     `json:"types"`
 	Amount        float32 `json:"amount"`
@@ -51,8 +51,8 @@ func (statement *Statement) Save() bool {
 	}
 }
 
-func GetStatementByUser(userID string) []*Statement {
+func GetStatementsByUser(userID string) []*Statement {
 	statements := []*Statement{}
-	GetDB().Table("statement").Where("user = ?", userID).Find(&statements)
+	GetDB().Where(&Statement{User: userID}).Find(&statements)
 	return statements
 }
