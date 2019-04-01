@@ -19,6 +19,7 @@ type Lending struct {
 	TransactionDate     string  `json:"transaction_date"`
 	PrefixedYield       float32 `json:"prefixed_yield"`
 	MonthlyInterestRate float32 `json:"monthly_interest_rate"`
+	PortionAmount       float32 `json:"portion_amount"`
 	PortionAlreadyPayed int     `json:"portion_already_payed"`
 	PaymentTimeMonth    int     `json:"payment_time_month"`
 	//HasIndex            bool    `json:"has_index"`
@@ -27,8 +28,12 @@ type Lending struct {
 }
 
 func (lending *Lending) BeforeCreate(scope *gorm.Scope) error {
+	total := math.Round(float64(lending.Amount * (1 + lending.PrefixedYield/100)))
+	monthlyPayment := Round(total/float64(lending.PaymentTimeMonth), .5, 2)
+
 	uu, _ := uuid.NewV4()
 	_ = scope.SetColumn("ID", uu.String())
+	_ = scope.SetColumn("PortionAmount", float32(monthlyPayment))
 	_ = scope.SetColumn("Status", false)
 	_ = scope.SetColumn("AlreadyInvested", 0)
 	_ = scope.SetColumn("PortionAlreadyPayed", 0)
@@ -113,20 +118,12 @@ func (lending *Lending) Transfer() bool {
 			lending.TransactionDate = time.Now().UTC().String()
 			lending.Save()
 
-			// PREFIXED YIELD
-			total := math.Round(float64(lending.Amount * (1 + lending.PrefixedYield/100)))
-			monthlyPayment := Round(total/float64(lending.PaymentTimeMonth), .5, 2)
-
 			for i := 1; i <= lending.PaymentTimeMonth; i++ {
 				payment := LendingPayment{
-					Taker:               lending.Taker,
 					Lending:             lending.ID,
-					Total:               lending.Amount,
-					Value:               float32(monthlyPayment),
 					Portion:             i,
 					LastPortion:         i == lending.PaymentTimeMonth,
 					Validate:            time.Now().UTC().AddDate(0, i, 0).Format(time.RFC3339),
-					MonthlyInterestRate: lending.MonthlyInterestRate,
 				}
 				payment.Create()
 			}
@@ -138,6 +135,22 @@ func (lending *Lending) Transfer() bool {
 	}
 
 	return false
+}
+
+func (lending *Lending) CalculatePrice(validate time.Time) float32 {
+	months := monthsCountSince(validate)
+
+	//if lending.MonthlyDelays != months {
+	//	payment.MonthlyDelays = months
+	//	payment.Save()
+	//}
+
+	if months == 0 {
+		// Normal Value
+		return lending.PortionAmount
+	} else {
+		return lending.PortionAmount * float32(math.Pow(float64(lending.MonthlyInterestRate/100+1.0), float64(months)))
+	}
 }
 
 func GetLendingById(id string) *Lending {

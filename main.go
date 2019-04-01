@@ -143,7 +143,7 @@ func simulate() {
 
 
 	// --------------[ Payment ]---------------
-	payments := models.GetLendingPaymentsByTaker(user1.ID)
+	payments := models.GetLendingPaymentsByLending(lending.ID)
 	taker := models.GetUserById(user1.ID)
 
 	fmt.Println()

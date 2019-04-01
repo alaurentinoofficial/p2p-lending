@@ -3,7 +3,6 @@ package models
 import (
 	"github.com/jinzhu/gorm"
 	"github.com/satori/go.uuid"
-	"math"
 	"os"
 	"strconv"
 	"time"
@@ -12,13 +11,8 @@ import (
 type LendingPayment struct {
 	ID                  string  `json:"id" gorm:"primary_key;"`
 	Lending             string  `json:"lending"`
-	Taker               string  `json:"taker"`
 	Validate            string  `json:"validate"`
-	Value               float32 `json:"value"`
-	Total               float32 `json:"total"`
 	Portion             int     `json:"Portion"`
-	MonthlyInterestRate float32 `json:"monthly_interest_rate"`
-	MonthlyDelays       int     `json:"monthly_delays"`
 	Status              bool    `json:"status"`
 	PaymentDate         string  `json:"payment_day"`
 	LastPortion         bool    `json:"last_portion"`
@@ -37,10 +31,10 @@ func (payment *LendingPayment) Verify() bool {
 	isvalid := true
 
 	isvalid = isvalid && len(payment.Lending) == len("dc5ccc85-c1ee-41b0-92a5-bd7bae46ad35")
-	isvalid = isvalid && len(payment.Taker) == len("dc5ccc85-c1ee-41b0-92a5-bd7bae46ad35")
+	//isvalid = isvalid && len(payment.Taker) == len("dc5ccc85-c1ee-41b0-92a5-bd7bae46ad35")
 	isvalid = isvalid && payment.Portion >= 1
-	isvalid = isvalid && payment.MonthlyDelays >= 0
-	isvalid = isvalid && payment.Value >= 0
+	//isvalid = isvalid && payment.MonthlyDelays >= 0
+	//isvalid = isvalid && payment.Value >= 0
 
 	return isvalid
 }
@@ -63,50 +57,44 @@ func (payment *LendingPayment) Save() bool {
 	}
 }
 
-func (payment *LendingPayment) Pay() {
+func (payment *LendingPayment) Pay(lending Lending) {
 	payment.PaymentDate = time.Now().UTC().Format(time.RFC3339)
 	payment.Status = true
 	payment.Save()
 
 	if payment.LastPortion {
 		admTaxe, _ := strconv.ParseFloat(os.Getenv("ADM_TAXE"), 32)
-		total := payment.Value * float32(payment.Portion)
-		total = payment.Total + ((total - payment.Total) * float32(admTaxe))
+		total := lending.PortionAmount * float32(payment.Portion)
+		total = lending.Amount + ((total - lending.Amount) * float32(admTaxe))
 		lenders := GetLendersByLending(payment.Lending)
 
 		for _, lender := range lenders {
-			UserInsertMoney(lender.User, float32(Round(float64(total*(lender.Amount/payment.Total)), .5, 2)), "Recebimento do empréstimo + Juros")
+			UserInsertMoney(lender.User, float32(Round(float64(total*(lender.Amount/lending.Amount)), .5, 2)), "Recebimento do empréstimo + Juros")
 		}
 	}
 }
 
-func (payment *LendingPayment) CalculatePrice() float32 {
-	validate, _ := time.Parse(time.RFC3339, payment.Validate)
-	months := monthsCountSince(validate)
-
-	if payment.MonthlyDelays != months {
-		payment.MonthlyDelays = months
-		payment.Save()
-	}
-
-	if months == 0 {
-		// Normal Value
-		return payment.Value
-	} else {
-		return payment.Value * float32(math.Pow(float64(payment.MonthlyInterestRate/100+1.0), float64(months)))
-	}
-}
+//func (payment *LendingPayment) CalculatePrice() float32 {
+//	validate, _ := time.Parse(time.RFC3339, payment.Validate)
+//	months := monthsCountSince(validate)
+//
+//	if payment.MonthlyDelays != months {
+//		payment.MonthlyDelays = months
+//		payment.Save()
+//	}
+//
+//	if months == 0 {
+//		// Normal Value
+//		return payment.Value
+//	} else {
+//		return payment.Value * float32(math.Pow(float64(payment.MonthlyInterestRate/100+1.0), float64(months)))
+//	}
+//}
 
 func GetLendingPayment(id string) *LendingPayment {
 	lendingPayment := LendingPayment{}
 	GetDB().Table("lending_payments").Where("id = ?", id).First(&lendingPayment)
 	return &lendingPayment
-}
-
-func GetLendingPaymentsByTaker(takerID string) []*LendingPayment {
-	lendingPayments := []*LendingPayment{}
-	GetDB().Table("lending_payments").Where("taker = ?", takerID).Find(&lendingPayments)
-	return lendingPayments
 }
 
 func GetLendingPaymentsByLending(lendingID string) []*LendingPayment {

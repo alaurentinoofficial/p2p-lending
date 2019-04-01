@@ -93,7 +93,8 @@ func (user *User) Pay(paymentID string) int {
 	lending := GetLendingById(payment.Lending)
 
 	if payment.ID != "" && lending.ID != "" && lending.Taker == user.ID {
-		price := payment.CalculatePrice()
+		validate, _ := time.Parse(time.RFC3339, payment.Validate)
+		price := lending.CalculatePrice(validate)
 
 		if lending.PortionAlreadyPayed+1 == payment.Portion {
 			if user.Balance-price >= 0 {
@@ -111,7 +112,7 @@ func (user *User) Pay(paymentID string) int {
 				lending.PortionAlreadyPayed += 1
 				lending.Save()
 
-				payment.Pay()
+				payment.Pay(*lending)
 				return types.Response.Ok
 			}
 
