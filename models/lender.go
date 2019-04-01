@@ -3,6 +3,7 @@ package models
 import (
 	"github.com/jinzhu/gorm"
 	"github.com/satori/go.uuid"
+	"p2p-lending/types"
 	"time"
 )
 
@@ -34,33 +35,46 @@ func (lender *Lender) AfterCreate(scope *gorm.Scope) error {
 	return nil
 }
 
-func (lender *Lender) Verify() bool {
+func (lender *Lender) Verify() int {
 	isvalid := true
-
-	lending := GetLendingById(lender.Lending)
-
-	isvalid = isvalid && len(lending.ID) == len("dc5ccc85-c1ee-41b0-92a5-bd7bae46ad35")
 	isvalid = isvalid && lender.Amount > float32(0)
 
-	return isvalid
+	lending := GetLendingById(lender.Lending)
+	user := GetUserById(lender.User)
+
+	if lending.ID == "" || user.ID == "" || !isvalid {
+		return types.Response.InvalidArguments
+	}
+
+	if lending.Amount - lending.AlreadyInvested >= lender.Amount {
+		if user.Balance - lender.Amount >= 0 {
+			return types.Response.Ok
+		}
+
+		return types.Response.InsufficientFunds
+	}
+
+	return types.Response.PaymentCeiling
 }
 
-func (lender *Lender) Create() bool {
-	if lender.Verify() {
+func (lender *Lender) Create() int {
+	result := lender.Verify()
+
+	if result == types.Response.Ok {
 		GetDB().Create(&lender)
-		return true
-	} else {
-		return false
 	}
+
+	return result
 }
 
-func (lender *Lender) Save() bool {
-	if lender.Verify() {
+func (lender *Lender) Save() int {
+	result := lender.Verify()
+
+	if result == types.Response.Ok {
 		GetDB().Save(&lender)
-		return true
-	} else {
-		return false
 	}
+
+	return result
 }
 
 func GetLenderById(id string) *Lender {
