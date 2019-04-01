@@ -109,6 +109,12 @@ func GetLendingPaymentsByTaker(takerID string) []*LendingPayment {
 	return lendingPayments
 }
 
+func GetLendingPaymentsByLending(lendingID string) []*LendingPayment {
+	lendingPayments := []*LendingPayment{}
+	GetDB().Table("lending_payments").Where("lending = ?", lendingID).Find(&lendingPayments)
+	return lendingPayments
+}
+
 func monthsCountSince(createdAtTime time.Time) int {
 	now := time.Now().UTC()
 	months := 0

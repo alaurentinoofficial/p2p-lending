@@ -24,6 +24,18 @@ func GetLendingById(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func GetLendingPayments(w http.ResponseWriter, req *http.Request) {
+	user := models.GetUserById(req.Context().Value("user").(string))
+	lending := models.GetLendingById(mux.Vars(req)["id"])
+
+	if user.ID == lending.Taker {
+		payments := models.GetLendingPaymentsByLending(lending.ID)
+		utils.ResponseJson(w, http.StatusOK, payments)
+	} else {
+		utils.Response(w, http.StatusOK, types.Response.NotFound)
+	}
+}
+
 func AddLending(w http.ResponseWriter, req *http.Request) {
 	userID := req.Context().Value("user").(string)
 
