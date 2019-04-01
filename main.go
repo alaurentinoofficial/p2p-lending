@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"p2p-lending/models"
+	"time"
 )
 
 func main() {
@@ -104,8 +105,11 @@ func main() {
 	payments := models.GetLendingPaymentsByTaker(user1.ID)
 	taker := models.GetUserById(user1.ID)
 
-	for _, payment := range payments {
+	fmt.Println()
+	for i, payment := range payments {
 		taker.Pay(payment.ID)
+		fmt.Println("[*] Payment month: ", i)
+		time.Sleep(time.Millisecond * 300)
 	}
 	// ----------------------------------------
 
