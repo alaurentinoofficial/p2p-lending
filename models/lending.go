@@ -5,7 +5,6 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/satori/go.uuid"
 	"math"
-	"p2p-lending/types"
 	"time"
 )
 
@@ -18,9 +17,9 @@ type Lending struct {
 	CreationDate        string  `json:"creation_date"`
 	Validate            string  `json:"validate"`
 	TransactionDate     string  `json:"transaction_date"`
-	HasIndex            bool    `json:"has_index"`
-	Index               int     `json:"index"`
-	IndexYield          float32 `json:"index_yield"`
+	//HasIndex            bool    `json:"has_index"`
+	//Index               int     `json:"index"`
+	//IndexYield          float32 `json:"index_yield"`
 	PrefixedYield       float32 `json:"prefixed_yield"`
 	MonthlyInterestRate float32 `json:"monthly_interest_rate"`
 	PaymentTimeMonth    int     `json:"payment_time_month"`
@@ -41,12 +40,13 @@ func (lending *Lending) Verify() bool {
 	isvalid = isvalid && len(lending.Taker) == len("dc5ccc85-c1ee-41b0-92a5-bd7bae46ad35")
 	isvalid = isvalid && lending.Amount > 1000
 
-	if lending.HasIndex {
-		isvalid = isvalid && types.Index.Check(lending.Index)
-		isvalid = isvalid && lending.IndexYield > 0
-	} else {
-		isvalid = isvalid && lending.PrefixedYield > 0
-	}
+	isvalid = isvalid && lending.PrefixedYield > 0
+	//if lending.HasIndex {
+	//	isvalid = isvalid && types.Index.Check(lending.Index)
+	//	isvalid = isvalid && lending.IndexYield > 0
+	//} else {
+	//	isvalid = isvalid && lending.PrefixedYield > 0
+	//}
 
 	isvalid = isvalid && lending.PaymentTimeMonth > 1
 
