@@ -10,13 +10,14 @@ type ResponseType struct {
 	Code    int    `json:"code"`
 }
 
-var ResponseMap map[int]string
+var ResponseMap = make(map[int]string)
 
 func init() {
 	ResponseMap[0] = "Successfully"
 	ResponseMap[1] = "Unauthorized"
-	ResponseMap[2] = "InvalidArguments"
-	ResponseMap[3] = "NotFound"
+	ResponseMap[2] = "Invalid Arguments"
+	ResponseMap[3] = "Not Found"
+	ResponseMap[4] = "Already Exists"
 }
 
 func Response(w http.ResponseWriter, status int, code int) {

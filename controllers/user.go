@@ -53,7 +53,12 @@ func Login (w http.ResponseWriter, r *http.Request) {
 func GetUser(w http.ResponseWriter, req *http.Request) {
 	user := models.GetUserById(req.Context().Value("user").(string))
 
-	utils.ResponseJson(w, http.StatusOK, user)
+	if user.ID != "" {
+		utils.ResponseJson(w, http.StatusOK, user)
+	} else {
+		var s struct{}
+		utils.ResponseJson(w, http.StatusOK, s)
+	}
 }
 
 func AddUser(w http.ResponseWriter, req *http.Request) {

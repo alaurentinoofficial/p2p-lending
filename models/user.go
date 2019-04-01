@@ -24,7 +24,7 @@ type User struct {
 	Email        string  `json:"email"`
 	Password     string  `json:"password"`
 	CreationDate string  `json:"creation_date"`
-	Type         int     `json:"types"`
+	Type         int     `json:"type"`
 	Salary       float32 `json:"salary"`
 	Score        int     `json:"score"`
 	CpfCnpj      string  `json:"cpf_cpnj"`

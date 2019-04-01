@@ -2,11 +2,35 @@ package main
 
 import (
 	"fmt"
+	"github.com/gorilla/mux"
+	"net/http"
+	"os"
+	"p2p-lending/controllers"
+	"p2p-lending/middlewares"
 	"p2p-lending/models"
 	"time"
 )
 
+var port string = ":8080"
+
 func main() {
+	r := mux.NewRouter()
+
+	r.HandleFunc("/register", controllers.AddUser).Methods("POST")
+	r.HandleFunc("/login", controllers.Login).Methods("POST")
+	r.HandleFunc("/user", controllers.GetUser).Methods("GET")
+
+	r.Use(middlewares.JwtAuthentication)
+
+	if os.Getenv("PORT") != "" {
+		port = ":" + os.Getenv("PORT")
+	}
+
+	fmt.Println("[*] Listening in ", port)
+	_ = http.ListenAndServe(port, r)
+}
+
+func simulate() {
 	// ---------------[ User ]-----------------
 	user1 := models.User{
 		Name: "Anderson Laurentino",

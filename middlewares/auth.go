@@ -16,7 +16,9 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		notAuth := []string{"/api/user", "/api/login"} //List of endpoints that doesn't require auth
+		w.Header().Set("Content-Type", "text/json")
+
+		notAuth := []string{"/register", "/login"} //List of endpoints that doesn't require auth
 		requestPath := r.URL.Path                      //current request path
 
 		//check if request does not need authentication, serve the request if it doesn't need it
@@ -27,7 +29,6 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 			}
 		}
 
-		response := make(map[string]interface{})
 		tokenHeader := r.Header.Get("Authorization")
 
 		//Token is missing, returns with error code 403 Unauthorized
@@ -40,7 +41,7 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 
 		// Parse the token
 		token, err := jwt.ParseWithClaims(tokenHeader, tk, func(token *jwt.Token) (interface{}, error) {
-			return []byte(os.Getenv("token_password")), nil
+			return []byte(os.Getenv("TOKEN_PASSWORD")), nil
 		})
 
 		//Malformed token, returns with http code 403 as usual
@@ -50,10 +51,10 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 		}
 
 		// Find that user
-		account := models.GetUserById(tk.UserId)
+		user := models.GetUserById(tk.UserId)
 
-		// Check if the token is valid or if this account exists
-		if !token.Valid || account == nil { //Token is invalid, maybe not signed on this server
+		// Check if the token is valid or if this user exists
+		if !token.Valid || user.ID == "" { //Token is invalid, maybe not signed on this server
 			utils.Response(w, http.StatusUnauthorized, types.Response.Unauthorized)
 			return
 		}
