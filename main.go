@@ -72,7 +72,7 @@ func simulate() {
 		CpfCnpj: "12345678901",
 		Salary: 0,
 		Score: 967,
-		Balance: float32(3000),
+		Balance: float32(6000),
 		State: "PE",
 		City: "Recife",
 		Neighborhood: "Boa vista",
@@ -106,7 +106,7 @@ func simulate() {
 	lending := models.Lending{
 		Taker: user1.ID,
 		AlreadyInvested: 0,
-		Amount: 10000,
+		Amount: 12000,
 		//HasIndex: false,
 		//Index: 0,
 		//IndexYield: 1,
@@ -121,7 +121,7 @@ func simulate() {
 	// -------------[ Lenders ]----------------
 	lender1 := models.Lender{
 		User: user2.ID,
-		Amount: float32(3000),
+		Amount: float32(5000),
 		Lending: lending.ID,
 	}
 	lender1.Create()

@@ -97,6 +97,7 @@ func (lending *Lending) Transfer() bool {
 	}
 
 	// Check all money received and check the date
+	fmt.Println(totalAmount)
 	if totalAmount == lending.Amount {
 		// Convert the validate date to time.Date
 		validate, _ := time.Parse(time.RFC3339, lending.Validate)

@@ -19,11 +19,23 @@ func AddLender(w http.ResponseWriter, req *http.Request) {
 	lender := models.Lender{}
 	err := json.NewDecoder(req.Body).Decode(&lender)
 
-	lender.User = req.Context().Value("user").(string)
+	lending := models.GetLendingById(lender.Lending)
+	user := models.GetUserById(req.Context().Value("user").(string))
 
-	if err == nil && lender.Create() {
-		utils.Response(w, http.StatusOK, types.Response.Ok)
-	} else {
+	if lending.ID == "" || err != nil || !lender.Verify() {
 		utils.Response(w, http.StatusNotAcceptable, types.Response.InvalidArguments)
+		return
+	}
+
+	if lending.Amount - lending.AlreadyInvested >= lender.Amount {
+		if user.Balance - lender.Amount >= 0 {
+			lender.User = req.Context().Value("user").(string)
+			utils.Response(w, http.StatusOK, types.Response.Ok)
+
+		} else {
+			utils.Response(w, http.StatusNotAcceptable, types.Response.InsufficientFunds)
+		}
+	} else {
+		utils.Response(w, http.StatusNotAcceptable, types.Response.PaymentCeiling)
 	}
 }

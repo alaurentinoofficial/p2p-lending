@@ -20,6 +20,7 @@ func init() {
 	ResponseMap[4] = "Already Exists"
 	ResponseMap[5] = "Insufficient Funds"
 	ResponseMap[6] = "Pay Previous Portions"
+	ResponseMap[7] = "Payment Ceiling"
 }
 
 func Response(w http.ResponseWriter, status int, code int) {

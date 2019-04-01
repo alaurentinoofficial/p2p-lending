@@ -8,6 +8,7 @@ type responseType struct {
 	AlreadyExists       int
 	InsufficientFunds   int
 	PayPreviousPortions int
+	PaymentCeiling      int
 }
 
 var Response = responseType{
@@ -18,4 +19,5 @@ var Response = responseType{
 	4,
 	5,
 	6,
+	7,
 }
