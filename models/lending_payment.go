@@ -3,6 +3,8 @@ package models
 import (
 	"github.com/jinzhu/gorm"
 	"github.com/satori/go.uuid"
+	"os"
+	"strconv"
 	"time"
 )
 
@@ -64,11 +66,15 @@ func (payment *LendingPayment) Pay() {
 	payment.Status = true
 	payment.Save()
 
-	total := payment.Value
-	lenders := GetLendersByLending(payment.Lending)
+	if payment.LastPortion {
+		admTaxe, _ := strconv.ParseFloat(os.Getenv("ADM_TAXE"), 32)
+		total := payment.Value * float32(payment.Portion)
+		total = payment.Total + ((total - payment.Total) * float32(admTaxe))
+		lenders := GetLendersByLending(payment.Lending)
 
-	for _, lender := range lenders {
-		UserInsertMoney(lender.User, float32(Round(float64(total*(lender.Amount/payment.Total)), .5, 2)), "Recebimento do empréstimo + Juros")
+		for _, lender := range lenders {
+			UserInsertMoney(lender.User, float32(Round(float64(total*(lender.Amount/payment.Total)), .5, 2)), "Recebimento do empréstimo + Juros")
+		}
 	}
 }
 
