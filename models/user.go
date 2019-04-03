@@ -39,6 +39,10 @@ func (user *User) BeforeCreate(scope *gorm.Scope) error {
 	_ = scope.SetColumn("ID", uu.String())
 	_ = scope.SetColumn("Balance", 0)
 	_ = scope.SetColumn("CreationDate", time.Now().UTC().Format(time.RFC3339))
+	
+	// TODO: Dispatch a request to SPCP and Serasa
+	_ = scope.SetColumn("Score", func() { return 0 })
+	
 	return nil
 }
 
