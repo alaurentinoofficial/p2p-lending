@@ -12,7 +12,7 @@ type LendingPayment struct {
 	ID                  string  `json:"id" gorm:"primary_key;"`
 	Lending             string  `json:"lending"`
 	Validate            string  `json:"validate"`
-	Portion             int     `json:"Portion"`
+	Portion             int     `json:"portion"`
 	Status              bool    `json:"status"`
 	PaymentDate         string  `json:"payment_day"`
 	LastPortion         bool    `json:"last_portion"`
