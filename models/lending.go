@@ -42,7 +42,7 @@ func (lending *Lending) BeforeCreate(scope *gorm.Scope) error {
 	return nil
 }
 
-func (lending *Lending) Verify() bool {
+func (lending *Lending) Verify() int {
 	isvalid := true
 
 	isvalid = isvalid && len(lending.Taker) == len("dc5ccc85-c1ee-41b0-92a5-bd7bae46ad35")
@@ -55,6 +55,12 @@ func (lending *Lending) Verify() bool {
 	//} else {
 	//	isvalid = isvalid && lending.PrefixedYield > 0
 	//}
+	
+	// Return int type
+	// alreadyExists := GetLendingByUser(lending.Taker)
+	// if alreadyExists.ID != "" {
+	// 	 return types.Response.AlreadyExists
+	// }
 
 	isvalid = isvalid && lending.PaymentTimeMonth > 1
 
@@ -151,6 +157,13 @@ func (lending *Lending) CalculatePrice(validate time.Time) float32 {
 func GetLendingById(id string) *Lending {
 	lending := Lending{}
 	GetDB().Table("lendings").First(&lending)
+
+	return &lending
+}
+
+func GetLendingByUser(userID string) *Lending {
+	lending := Lending{}
+	GetDB().Where(&Lending{User: userID}).First(&lending)
 
 	return &lending
 }
