@@ -37,6 +37,7 @@ type User struct {
 func (user *User) BeforeCreate(scope *gorm.Scope) error {
 	uu, _ := uuid.NewV4()
 	_ = scope.SetColumn("ID", uu.String())
+	_ = scope.SetColumn("Balance", 0)
 	_ = scope.SetColumn("CreationDate", time.Now().UTC().Format(time.RFC3339))
 	return nil
 }
